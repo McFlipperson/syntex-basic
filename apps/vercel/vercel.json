@@ -1,0 +1,25 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/sse/stream.ts": {
+      "maxDuration": 300
+    },
+    "api/chat/send.ts": {
+      "maxDuration": 60
+    },
+    "api/v1/chat/completions.ts": {
+      "maxDuration": 300
+    }
+  },
+  "routes": [
+    { "src": "/icon-192.png",      "dest": "/icon-192.png" },
+    { "src": "/manifest.json",    "dest": "/manifest.json" },
+    { "src": "/sw.js",            "dest": "/sw.js",            "headers": { "Cache-Control": "no-cache" } },
+    { "src": "/syntex-widget.js", "dest": "/syntex-widget.js" },
+    { "src": "/chat.html",        "dest": "/chat.html" },
+    { "src": "/onboarding.html",  "dest": "/onboarding.html" },
+    { "src": "/credits.html",     "dest": "/credits.html" },
+    { "src": "/SYNTEX2.0.html",   "dest": "/SYNTEX2.0.html" },
+    { "src": "/api/(.*)",         "dest": "/api/$1" }
+  ]
+}

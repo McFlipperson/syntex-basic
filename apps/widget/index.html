@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Syntex Widget — Test Harness</title>
+  </head>
+  <body style="font-family: sans-serif; padding: 40px;">
+    <h1>Syntex widget test harness</h1>
+    <p>The widget mounts in the bottom-right corner.</p>
+    <script>
+      window.SYNTEX_CONFIG = {
+        apiOrigin: "http://localhost:3000",
+      };
+    </script>
+    <script type="module" src="/src/index.ts"></script>
+  </body>
+</html>

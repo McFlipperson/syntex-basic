@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Syntex — Add Credits</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --lime:  #B8FF00;
+      --black: #000000;
+      --grey:  #1a1a1a;
+      --grey2: #2a2a2a;
+      --grey3: #444;
+      --grey4: #888;
+      --white: #ffffff;
+      --mono:  'IBM Plex Mono', monospace;
+      --bebas: 'Bebas Neue', sans-serif;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--black);
+      color: var(--white);
+      font-family: var(--mono);
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 24px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 48px;
+    }
+
+    .logo {
+      font-family: var(--bebas);
+      font-size: 28px;
+      letter-spacing: 2px;
+      color: var(--white);
+    }
+
+    .back-link {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--grey4);
+      text-decoration: none;
+      border-bottom: 1px solid var(--grey3);
+      padding-bottom: 2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .back-link:hover {
+      color: var(--white);
+      border-color: var(--grey4);
+    }
+
+    /* ── Balance block ── */
+    .balance-block {
+      margin-bottom: 32px;
+    }
+
+    .label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--grey4);
+      margin-bottom: 8px;
+    }
+
+    .balance-amount {
+      font-family: var(--bebas);
+      font-size: 56px;
+      letter-spacing: 2px;
+      color: var(--white);
+      line-height: 1;
+    }
+
+    .balance-amount.loading {
+      color: var(--grey3);
+    }
+
+    /* ── Banners ── */
+    .banner {
+      padding: 10px 14px;
+      font-size: 11px;
+      font-weight: 500;
+      border-radius: 2px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .banner.visible { display: block; }
+
+    .banner.success {
+      border: 1px solid rgba(184,255,0,0.4);
+      background: rgba(184,255,0,0.06);
+      color: var(--lime);
+    }
+    .banner.cancelled {
+      border: 1px solid var(--grey3);
+      background: var(--grey);
+      color: var(--grey4);
+    }
+    .banner.warning {
+      border: 1px solid rgba(245,158,11,0.4);
+      background: rgba(245,158,11,0.06);
+      color: #F59E0B;
+    }
+    .banner.error {
+      border: 1px solid rgba(239,68,68,0.4);
+      background: rgba(239,68,68,0.06);
+      color: #EF4444;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--grey2);
+      margin: 32px 0;
+    }
+
+    /* ── Amount section ── */
+    .section-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--grey4);
+      margin-bottom: 16px;
+    }
+
+    .amount-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .preset {
+      padding: 10px 20px;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      border: 1px solid var(--grey3);
+      border-radius: 2px;
+      background: var(--black);
+      color: var(--grey4);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .preset:hover {
+      border-color: var(--grey4);
+      color: var(--white);
+    }
+    .preset.selected {
+      border-color: var(--lime);
+      color: var(--lime);
+      background: rgba(184,255,0,0.05);
+    }
+
+    .custom-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      border: 1px solid var(--grey3);
+      border-radius: 2px;
+      background: var(--black);
+      transition: border-color 0.15s;
+      flex: 1;
+      min-width: 100px;
+    }
+    .custom-wrap:focus-within {
+      border-color: var(--lime);
+    }
+    .custom-wrap.selected {
+      border-color: var(--lime);
+    }
+
+    .custom-prefix {
+      padding: 10px 0 10px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--grey4);
+      font-family: var(--mono);
+      user-select: none;
+    }
+
+    #custom-amount {
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--white);
+      padding: 10px 12px 10px 4px;
+      width: 100%;
+      -moz-appearance: textfield;
+    }
+    #custom-amount::-webkit-outer-spin-button,
+    #custom-amount::-webkit-inner-spin-button { -webkit-appearance: none; }
+    #custom-amount::placeholder { color: var(--grey3); }
+
+    /* ── Primary button ── */
+    .btn-primary {
+      width: 100%;
+      padding: 16px;
+      background: var(--lime);
+      color: var(--black);
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-top: 8px;
+    }
+    .btn-primary:hover:not(:disabled) { background: #d4ff33; }
+    .btn-primary:disabled {
+      background: var(--grey2);
+      color: var(--grey4);
+      cursor: default;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="container">
+
+      <div class="header">
+        <div class="logo">SYNTEX</div>
+        <a href="/SYNTEX2_0.html" class="back-link">← Back to modal</a>
+      </div>
+
+      <div class="balance-block">
+        <div class="label">Credit Balance</div>
+        <div class="balance-amount loading" id="balance-display">—</div>
+      </div>
+
+      <div id="banner-success"   class="banner success">Credits added successfully.</div>
+      <div id="banner-cancelled" class="banner cancelled">Deposit cancelled.</div>
+      <div id="banner-warning"   class="banner warning">Low balance — add credits to continue using Syntex.</div>
+      <div id="banner-error"     class="banner error"></div>
+
+      <hr class="divider" />
+
+      <div class="section-label">Add Credits</div>
+
+      <div class="amount-row">
+        <button class="preset" data-amount="5">$5</button>
+        <button class="preset" data-amount="10">$10</button>
+        <button class="preset" data-amount="25">$25</button>
+        <div class="custom-wrap" id="custom-wrap">
+          <span class="custom-prefix">$</span>
+          <input type="number" id="custom-amount" placeholder="other" min="1" max="500" step="1" />
+        </div>
+      </div>
+
+      <button class="btn-primary" id="add-btn" disabled>Add Credits</button>
+
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('syntexToken');
+    if (!token) window.location.href = '/onboarding.html?login=1';
+
+    const balanceEl    = document.getElementById('balance-display');
+    const addBtn       = document.getElementById('add-btn');
+    const customInput  = document.getElementById('custom-amount');
+    const customWrap   = document.getElementById('custom-wrap');
+    const presets      = document.querySelectorAll('.preset');
+
+    let selectedAmount = null;
+
+    // ── URL param banners ────────────────────────────────────────────────────
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('deposit') === 'success') {
+      document.getElementById('banner-success').classList.add('visible');
+      // Clean the URL
+      history.replaceState(null, '', window.location.pathname);
+    } else if (params.get('deposit') === 'cancelled') {
+      document.getElementById('banner-cancelled').classList.add('visible');
+      history.replaceState(null, '', window.location.pathname);
+    }
+
+    // ── Load balance ─────────────────────────────────────────────────────────
+    async function loadBalance() {
+      try {
+        const res  = await fetch('/api/user', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (res.status === 401) { window.location.href = '/onboarding.html'; return; }
+        const data = await res.json();
+        const bal  = parseFloat(data.credit_balance) || 0;
+        balanceEl.textContent = '$' + bal.toFixed(2);
+        balanceEl.classList.remove('loading');
+        if (bal < 1.00) {
+          document.getElementById('banner-warning').classList.add('visible');
+        }
+      } catch (e) {
+        balanceEl.textContent = '—';
+      }
+    }
+    loadBalance();
+
+    // ── Amount selection ─────────────────────────────────────────────────────
+    function setAmount(amount) {
+      selectedAmount = amount;
+      addBtn.disabled = !amount;
+    }
+
+    presets.forEach(btn => {
+      btn.addEventListener('click', () => {
+        presets.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        customInput.value = '';
+        customWrap.classList.remove('selected');
+        setAmount(parseFloat(btn.dataset.amount));
+      });
+    });
+
+    customInput.addEventListener('input', () => {
+      presets.forEach(b => b.classList.remove('selected'));
+      const val = parseFloat(customInput.value);
+      if (customInput.value && !isNaN(val)) {
+        customWrap.classList.add('selected');
+        setAmount(val);
+      } else {
+        customWrap.classList.remove('selected');
+        setAmount(null);
+      }
+    });
+
+    // ── Checkout ─────────────────────────────────────────────────────────────
+    addBtn.addEventListener('click', async () => {
+      const errorBanner = document.getElementById('banner-error');
+      errorBanner.classList.remove('visible');
+
+      if (!selectedAmount || isNaN(selectedAmount) || selectedAmount < 1) {
+        errorBanner.textContent = 'Please enter an amount of at least $1.';
+        errorBanner.classList.add('visible');
+        return;
+      }
+      if (selectedAmount > 500) {
+        errorBanner.textContent = 'Maximum deposit is $500.';
+        errorBanner.classList.add('visible');
+        return;
+      }
+
+      addBtn.disabled  = true;
+      addBtn.textContent = 'PROCESSING...';
+
+      try {
+        const res  = await fetch('/api/stripe/checkout', {
+          method:  'POST',
+          headers: {
+            'Content-Type':  'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ amount: selectedAmount })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          errorBanner.textContent = data.error || 'Checkout failed. Please try again.';
+          errorBanner.classList.add('visible');
+          addBtn.disabled    = false;
+          addBtn.textContent = 'ADD CREDITS';
+          return;
+        }
+
+        window.location.href = data.url;
+
+      } catch (e) {
+        errorBanner.textContent = 'Network error. Please try again.';
+        errorBanner.classList.add('visible');
+        addBtn.disabled    = false;
+        addBtn.textContent = 'ADD CREDITS';
+      }
+    });
+  </script>
+</body>
+</html>

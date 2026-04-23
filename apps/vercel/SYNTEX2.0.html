@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SYNTEX — Stop Overpaying for AI</title>
+<meta name="description" content="Your agents are burning money. Syntex fixes that. Patent pending.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --black:#080808;--white:#f0f0f0;--lime:#B8FF00;
+  --gray:#1a1a1a;--gray2:#2a2a2a;--gray3:#444;--muted:#888;
+  --bebas:'Bebas Neue',sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+  --body:'Space Grotesk',sans-serif;
+}
+html{scroll-behavior:smooth;overflow-x:hidden;}
+body{background:var(--black);color:var(--white);font-family:var(--body);overflow-x:hidden;cursor:none;}
+.cursor{position:fixed;width:12px;height:12px;background:var(--lime);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform 0.1s;border-radius:0;}
+.cursor.big{transform:translate(-50%,-50%) scale(4);background:transparent;border:1px solid var(--lime);}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:998;opacity:0.6;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 32px;border-bottom:1px solid var(--gray2);background:var(--black);}
+.nav-logo{font-family:var(--bebas);font-size:28px;letter-spacing:0.05em;color:var(--white);text-decoration:none;}
+.nav-logo span{color:var(--lime);}
+.nav-right{display:flex;align-items:center;gap:32px;}
+.nav-link{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color 0.15s;}
+.nav-link:hover{color:var(--lime);}
+.nav-badge{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;border:1px solid var(--gray3);color:var(--muted);padding:6px 12px;}
+
+.hero{min-height:100vh;padding:120px 32px 80px;display:flex;flex-direction:column;justify-content:flex-end;border-bottom:1px solid var(--gray2);position:relative;overflow:hidden;}
+.hero-bg-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--bebas);font-size:clamp(120px,18vw,280px);color:transparent;-webkit-text-stroke:1px var(--gray2);white-space:nowrap;pointer-events:none;letter-spacing:0.02em;user-select:none;animation:drift 20s ease-in-out infinite alternate;}
+@keyframes drift{from{transform:translate(-50%,-50%) scale(1);}to{transform:translate(-50%,-52%) scale(1.02);}}
+.hero-tag{font-family:var(--mono);font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--lime);margin-bottom:24px;display:flex;align-items:center;gap:12px;}
+.hero-tag::before{content:'';display:block;width:24px;height:1px;background:var(--lime);}
+.hero-title{font-family:var(--bebas);font-size:clamp(72px,12vw,180px);line-height:0.92;letter-spacing:0.01em;color:var(--white);position:relative;}
+.hero-title .accent{color:var(--lime);}
+.hero-title .outline{color:transparent;-webkit-text-stroke:2px var(--white);}
+.hero-bottom{display:flex;align-items:flex-end;justify-content:space-between;margin-top:48px;flex-wrap:wrap;gap:32px;}
+.hero-sub{font-size:18px;line-height:1.6;color:rgba(240,240,240,0.5);max-width:480px;}
+.hero-sub strong{color:var(--white);}
+.hero-cta{display:flex;flex-direction:column;align-items:flex-end;gap:16px;}
+.btn-lime{font-family:var(--mono);font-size:24px;letter-spacing:0.1em;text-transform:uppercase;background:var(--lime);color:var(--black);padding:16px 32px;text-decoration:none;font-weight:500;transition:background 0.15s,transform 0.15s;display:inline-block;}
+.btn-lime:hover{background:#d4ff33;transform:translate(-2px,-2px);}
+.btn-ghost{font-family:var(--mono);font-size:22px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;border-bottom:1px solid var(--gray3);padding-bottom:2px;transition:color 0.15s;}
+.btn-ghost:hover{color:var(--white);}
+.hero-savings{margin-top:48px;padding-top:32px;border-top:1px solid var(--gray2);}
+.savings-label{font-family:var(--mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.savings-num{font-family:var(--bebas);font-size:56px;color:var(--lime);line-height:1;}
+.savings-sub{font-size:13px;color:var(--gray3);margin-top:6px;}
+
+.ticker{border-top:1px solid var(--gray2);border-bottom:1px solid var(--gray2);padding:28px 32px;display:flex;align-items:center;gap:48px;background:var(--gray);}
+.ticker-label{font-family:var(--mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);white-space:nowrap;min-width:140px;}
+.ticker-number{font-family:var(--bebas);font-size:56px;color:var(--lime);letter-spacing:0.02em;line-height:1;white-space:nowrap;}
+.ticker-sub{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.6;max-width:320px;}
+
+.marquee-wrap{border-bottom:1px solid var(--gray2);border-top:1px solid var(--gray2);padding:18px 0;overflow:hidden;background:var(--gray);}
+.marquee-track{display:flex;animation:marquee 18s linear infinite;width:max-content;}
+@keyframes marquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.marquee-item{font-family:var(--bebas);font-size:22px;letter-spacing:0.2em;text-transform:uppercase;color:var(--white);padding:0 36px;white-space:nowrap;}
+.marquee-item.lit{color:var(--lime);}
+
+.problem{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--gray2);}
+.problem-left{padding:80px 48px;border-right:1px solid var(--gray2);}
+.problem-right{padding:80px 48px;display:flex;flex-direction:column;justify-content:center;}
+.section-num{font-family:var(--mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:24px;}
+.big-statement{font-family:var(--bebas);font-size:clamp(48px,6vw,96px);line-height:0.95;letter-spacing:0.01em;color:var(--white);margin-bottom:32px;}
+.big-statement .lime{color:var(--lime);}
+.body-text{font-size:19px;line-height:1.75;color:rgba(240,240,240,0.5);max-width:480px;}
+.body-text strong{color:var(--white);}
+.pain-item{padding:32px 0;border-bottom:1px solid var(--gray2);}
+.pain-item:last-child{border-bottom:none;}
+.pain-num{font-family:var(--mono);font-size:13px;color:var(--lime);letter-spacing:0.15em;margin-bottom:12px;}
+.pain-title{font-size:23px;font-weight:600;color:var(--white);margin-bottom:8px;}
+.pain-text{font-size:17px;color:var(--muted);line-height:1.65;}
+
+.rise{padding:80px 48px;border-bottom:1px solid var(--gray2);}
+.rise-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:48px;flex-wrap:wrap;gap:16px;}
+.rise-title{font-family:var(--bebas);font-size:clamp(48px,7vw,120px);line-height:1;letter-spacing:0.02em;color:var(--white);}
+.rise-desc{font-size:15px;color:var(--muted);max-width:360px;line-height:1.6;}
+.rise-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--gray2);border:1px solid var(--gray2);}
+.rise-card{background:var(--black);padding:40px 32px;transition:background 0.2s;position:relative;overflow:hidden;}
+.rise-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gray2);transition:background 0.2s;}
+.rise-card:hover{background:var(--gray);}
+.rise-card:hover::before{background:var(--lime);}
+.rise-letter{font-family:var(--bebas);font-size:96px;line-height:1;color:var(--gray2);transition:color 0.2s;margin-bottom:16px;}
+.rise-card:hover .rise-letter{color:var(--lime);}
+.rise-name{font-family:var(--mono);font-size:16px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.rise-desc-card{font-size:19px;color:rgba(240,240,240,0.4);line-height:1.55;}
+.rise-cost{margin-top:24px;font-family:var(--mono);font-size:23px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray3);}
+.rise-tagline{font-family:var(--bebas);font-size:clamp(28px,3.5vw,42px);color:var(--white);text-align:center;padding:56px 48px 8px;letter-spacing:0.02em;line-height:1.2;}
+
+.openclaw{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--gray2);}
+.openclaw-left{padding:80px 48px;border-right:1px solid var(--gray2);background:var(--lime);display:flex;flex-direction:column;justify-content:space-between;}
+.openclaw-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(8,8,8,0.5);margin-bottom:24px;}
+.openclaw-title{font-family:var(--bebas);font-size:clamp(48px,5vw,80px);line-height:0.95;color:var(--black);letter-spacing:0.01em;}
+.openclaw-body{font-size:16px;line-height:1.7;color:rgba(8,8,8,0.6);margin-top:32px;}
+.btn-black{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;background:var(--black);color:var(--lime);padding:14px 28px;text-decoration:none;display:inline-block;margin-top:40px;transition:transform 0.15s;}
+.btn-black:hover{transform:translate(-2px,-2px);}
+.openclaw-right{padding:48px;display:flex;flex-direction:column;justify-content:center;}
+.session-title{font-family:var(--mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:24px;}
+.session-row{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--gray2);transition:background 0.15s;}
+.session-row:hover{background:var(--gray);}
+.session-task{font-size:13px;color:rgba(240,240,240,0.6);}
+.session-right{display:flex;align-items:center;gap:16px;}
+.tier-pill{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;background:var(--gray2);color:var(--lime);padding:3px 8px;}
+.cost-old{font-family:var(--mono);font-size:12px;color:var(--gray3);text-decoration:line-through;}
+.cost-new{font-family:var(--mono);font-size:12px;color:#7ec88a;}
+.session-total{display:flex;align-items:center;justify-content:space-between;padding:20px;margin-top:1px;background:var(--gray);}
+.total-label{font-size:13px;font-weight:600;color:var(--white);}
+.total-right{display:flex;gap:20px;align-items:center;}
+.total-old{font-family:var(--mono);font-size:13px;color:var(--gray3);text-decoration:line-through;}
+.total-new{font-family:var(--bebas);font-size:32px;color:var(--lime);}
+.saving-pct{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:right;margin-top:8px;}
+
+.pricing{padding:80px 48px;border-bottom:1px solid var(--gray2);}
+.pricing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--gray2);border:1px solid var(--gray2);}
+.plan{background:var(--black);padding:48px 36px;position:relative;transition:background 0.2s;}
+.plan:hover{background:var(--gray);}
+.plan.featured{background:var(--gray);}
+.plan.featured:hover{background:var(--gray2);}
+.plan-tier{font-family:var(--bebas);font-size:64px;line-height:1;color:var(--gray2);margin-bottom:8px;transition:color 0.2s;}
+.plan:hover .plan-tier{color:var(--lime);}
+.plan.featured .plan-tier{color:var(--lime);}
+.plan-name{font-family:var(--mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:24px;}
+.plan-price{font-family:var(--bebas);font-size:56px;line-height:1;color:var(--white);margin-bottom:4px;}
+.plan.featured .plan-price{color:var(--lime);}
+.plan-period{font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:24px;}
+.plan-desc{font-size:14px;line-height:1.7;color:rgba(240,240,240,0.4);margin-bottom:40px;}
+.plan-btn{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;border:1px solid var(--gray2);color:var(--muted);padding:12px 24px;text-decoration:none;display:inline-block;transition:all 0.15s;}
+.plan-btn:hover{border-color:var(--lime);color:var(--lime);}
+.plan.featured .plan-btn{background:var(--lime);color:var(--black);border-color:var(--lime);}
+.plan.featured .plan-btn:hover{background:#d4ff33;}
+.featured-bar{position:absolute;top:0;left:0;right:0;height:3px;background:var(--lime);}
+
+.about{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--gray2);}
+.about-left{padding:80px 48px;border-right:1px solid var(--gray2);}
+.about-right{padding:80px 48px;display:flex;flex-direction:column;justify-content:center;}
+.about-title{font-family:var(--bebas);font-size:clamp(48px,5vw,80px);line-height:0.95;color:var(--white);margin-bottom:32px;}
+.about-body{font-size:16px;line-height:1.8;color:rgba(240,240,240,0.45);margin-bottom:20px;}
+.about-body strong{color:var(--white);}
+.founder-block{border:1px solid var(--gray2);padding:40px;}
+.founder-name{font-family:var(--bebas);font-size:48px;color:var(--white);line-height:1;margin-bottom:8px;}
+.founder-role{font-family:var(--mono);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--lime);margin-bottom:24px;}
+.founder-text{font-size:14px;color:var(--muted);line-height:1.7;}
+
+.cta-block{padding:120px 48px;text-align:center;border-bottom:1px solid var(--gray2);position:relative;overflow:hidden;}
+.cta-bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.cta-bg-word{font-family:var(--bebas);font-size:clamp(160px,22vw,320px);color:transparent;-webkit-text-stroke:1px var(--gray2);white-space:nowrap;letter-spacing:0.02em;user-select:none;}
+.cta-title{font-family:var(--bebas);font-size:clamp(56px,7vw,112px);line-height:0.95;color:var(--white);margin-bottom:24px;position:relative;z-index:1;}
+.cta-title .lime{color:var(--lime);}
+.cta-sub{font-size:17px;color:var(--muted);margin-bottom:48px;position:relative;z-index:1;}
+.cta-buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1;margin-bottom:40px;}
+.cta-email{font-family:var(--mono);font-size:13px;color:var(--muted);text-decoration:none;border-bottom:1px solid var(--gray3);padding-bottom:2px;position:relative;z-index:1;transition:color 0.15s;}
+.cta-email:hover{color:var(--lime);}
+
+footer{padding:32px 48px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--gray2);flex-wrap:wrap;gap:16px;}
+.footer-logo{font-family:var(--bebas);font-size:24px;color:var(--white);text-decoration:none;letter-spacing:0.05em;}
+.footer-logo span{color:var(--lime);}
+.footer-copy{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray3);}
+.footer-links{display:flex;gap:24px;list-style:none;}
+.footer-links a{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray3);text-decoration:none;transition:color 0.15s;}
+.footer-links a:hover{color:var(--lime);}
+
+@media(max-width:900px){
+  nav{padding:14px 20px;}
+  .nav-links{display:none;}
+  .hero{padding:100px 20px 60px;}
+  .hero-bg-text{font-size:80px;}
+  .problem,.openclaw,.about{grid-template-columns:1fr;}
+  .problem-left,.openclaw-left,.about-left{border-right:none;border-bottom:1px solid var(--gray2);}
+  .problem-left,.problem-right,.rise,.openclaw-left,.openclaw-right,.about-left,.about-right,.pricing,.cta-block{padding:48px 20px;}
+  .rise-grid{grid-template-columns:1fr 1fr;}
+  .pricing-grid{grid-template-columns:1fr;}
+  .ticker{padding:24px 20px;gap:24px;flex-wrap:wrap;}
+  .ticker-number{font-size:48px;}
+  footer{padding:24px 20px;flex-direction:column;text-align:center;}
+}
+
+@media(max-width:600px){
+  nav{padding:12px 16px;}
+  .nav-logo{font-size:22px;}
+  .nav-badge{display:none;}
+  .hero{padding:88px 16px 48px;}
+  .hero-title{font-size:clamp(44px,13vw,72px);}
+  .hero-bg-text{font-size:52px;}
+  .hero-bottom{flex-direction:column;align-items:flex-start;}
+  .hero-sub{font-size:16px;max-width:100%;}
+  .hero-cta{align-items:flex-start;width:100%;}
+  .btn-lime{font-size:17px;padding:14px 20px;max-width:100%;box-sizing:border-box;}
+  .btn-ghost{font-size:16px;}
+  .problem-left,.problem-right,.rise,.openclaw-left,.openclaw-right,.about-left,.about-right,.pricing,.cta-block{padding:36px 16px;}
+  .body-text,.rise-desc,.ticker-sub{max-width:100%;}
+  .rise-header > div{max-width:100% !important;}
+  .rise-grid{grid-template-columns:1fr;}
+  .rise-card{padding:28px 20px;}
+  .marquee-item{font-size:17px;padding:0 20px;}
+  .ticker{padding:20px 16px;flex-wrap:wrap;}
+  .ticker-label{min-width:unset;white-space:normal;}
+  .ticker-number{font-size:40px;}
+  .session-row{flex-wrap:wrap;gap:8px;}
+  footer{padding:20px 16px;}
+}
+</style>
+</head>
+<body>
+<div class="cursor" id="cursor"></div>
+
+<nav>
+  <a href="#" class="nav-logo">SYNTEX<span>.</span></a>
+  <div class="nav-right">
+    <a href="#rise" class="nav-link">Protocol</a>
+    <a href="#rise" class="nav-link">Pricing</a>
+    <a href="#about" class="nav-link">About</a>
+    <div class="nav-badge">Patent Pending</div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg-text">SYNTEX</div>
+  <div class="hero-tag">AI Cost Governance</div>
+  <h1 class="hero-title">
+    <span class="outline">STOP</span><br>
+    OVER<span class="accent">PAY</span>ING<br>
+    FOR AI<span class="accent">.</span>
+  </h1>
+  <div class="hero-bottom">
+    <p class="hero-sub">Your agents are burning money on tasks that don't need premium models. <strong>Syntex fixes that automatically.</strong></p>
+    <div class="hero-cta">
+      <a href="/onboarding.html" class="btn-lime">Start Saving →</a>
+      <a href="#rise" class="btn-ghost">How it works</a>
+    </div>
+  </div>
+  <div class="hero-savings">
+    <div class="savings-label">Total saved by Syntex users</div>
+    <div class="savings-num" id="savingsCounter">$0.00</div>
+    <div class="savings-sub">Real savings from real agent tasks. Growing every day.</div>
+  </div>
+</section>
+
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span class="marquee-item lit">Stop Overpaying</span><span class="marquee-item">·</span>
+    <span class="marquee-item">Route Smarter</span><span class="marquee-item">·</span>
+    <span class="marquee-item lit">Patent Pending</span><span class="marquee-item">·</span>
+    <span class="marquee-item">Model Agnostic</span><span class="marquee-item">·</span>
+    <span class="marquee-item lit">Works with OpenClaw</span><span class="marquee-item">·</span>
+    <span class="marquee-item">Up to 75% Savings</span><span class="marquee-item">·</span>
+    <span class="marquee-item lit">Stop Overpaying</span><span class="marquee-item">·</span>
+    <span class="marquee-item">Route Smarter</span><span class="marquee-item">·</span>
+    <span class="marquee-item lit">Patent Pending</span><span class="marquee-item">·</span>
+    <span class="marquee-item">Model Agnostic</span><span class="marquee-item">·</span>
+    <span class="marquee-item lit">Works with OpenClaw</span><span class="marquee-item">·</span>
+    <span class="marquee-item">Up to 75% Savings</span><span class="marquee-item">·</span>
+  </div>
+</div>
+
+<section class="rise" id="rise">
+  <div class="rise-header">
+    <h2 class="rise-title">THE RISE<br>PROTOCOL.</h2>
+    <div style="max-width:360px;">
+      <div style="font-family:var(--bebas);font-size:28px;letter-spacing:0.05em;color:var(--lime);margin-bottom:12px;">How it Works</div>
+      <p class="rise-desc">Four tiers. Every task automatically classified and routed to the right model. Nothing over-engineered. Nothing under-resourced.</p>
+    </div>
+  </div>
+  <div class="rise-grid">
+    <div class="rise-card">
+      <div class="rise-letter">R</div>
+      <div class="rise-name">Routine</div>
+      <div class="rise-desc-card">Rename. Reformat. Repeat. No thinking needed — no premium charged.</div>
+      <div class="rise-cost">Fee: $0.001</div>
+      <a href="/onboarding.html" class="btn-ghost">Start Saving</a>
+    </div>
+    <div class="rise-card">
+      <div class="rise-letter">I</div>
+      <div class="rise-name">Intelligent</div>
+      <div class="rise-desc-card">Writing that needs a brain. Emails, summaries, copy. Smart but affordable.</div>
+      <div class="rise-cost">Fee: $0.005</div>
+      <a href="/onboarding.html" class="btn-ghost">Start Saving</a>
+    </div>
+    <div class="rise-card">
+      <div class="rise-letter">S</div>
+      <div class="rise-name">Synthesis</div>
+      <div class="rise-desc-card">Research, tool use, multi-step tasks. Where Syntex saves you the most.</div>
+      <div class="rise-cost">Fee: $0.009</div>
+      <a href="/onboarding.html" class="btn-ghost">Start Saving</a>
+    </div>
+    <div class="rise-card">
+      <div class="rise-letter">E</div>
+      <div class="rise-name">Engineering</div>
+      <div class="rise-desc-card">System design, deep debugging. Top model — only when nothing else will do.</div>
+      <div class="rise-cost">Fee: $0.010</div>
+      <a href="/onboarding.html" class="btn-ghost">Start Saving</a>
+    </div>
+  </div>
+  <p class="rise-tagline">Our fee is always less than your saving. If you don't save, you don't pay.</p>
+</section>
+
+<section class="problem">
+  <div class="problem-left">
+    <h2 class="big-statement">YOUR BILL IS <span class="lime">BROKEN.</span></h2>
+    <p class="body-text">You don't pay your secretary a CEO salary. <strong>So why is every Agent task billed at the same rate</strong> — whether it's renaming a file or designing an entire system?</p>
+    <p class="body-text" style="margin-top:20px;">Every token costs the same. Doesn't matter if your agent is formatting a CSV or building a system architecture. Syntex fixes that.</p>
+  </div>
+  <div class="problem-right">
+    <div class="pain-item">
+      <div class="pain-num">01 —</div>
+      <div class="pain-title">Your agent doesn't know cheap from expensive</div>
+      <div class="pain-text">Renaming a file costs the same as designing a system. Nobody told it otherwise. Syntex does — automatically, before every task.</div>
+    </div>
+    <div class="pain-item">
+      <div class="pain-num">02 —</div>
+      <div class="pain-title">You're locked into one provider</div>
+      <div class="pain-text">Your agent is wired to one model. Switching means touching code, rewriting prompts, breaking workflows. With Syntex, you change one setting and you're done.</div>
+    </div>
+    <div class="pain-item">
+      <div class="pain-num">03 —</div>
+      <div class="pain-title">You find out what it cost on billing day</div>
+      <div class="pain-text">Agents spend freely. You find out later — sometimes much later. Syntex shows you what every task will cost before it runs, not after.</div>
+    </div>
+  </div>
+</section>
+
+<section class="openclaw">
+  <div class="openclaw-left">
+    <div>
+      <div class="openclaw-eyebrow">For OpenClaw Users</div>
+      <h2 class="openclaw-title">OPENCLAW<br>IS GREAT.<br>YOUR BILL<br>ISN'T.</h2>
+      <p class="openclaw-body">Syntex plugs into OpenClaw and routes every task to the right model automatically. You keep the power. You stop the bleeding.</p>
+    </div>
+    <a href="/onboarding.html" class="btn-black">Start Saving →</a>
+  </div>
+  <div class="openclaw-right">
+    <div class="session-title">Example session — mixed workflow</div>
+    <div class="session-row"><span class="session-task">Rename 12 files</span><div class="session-right"><span class="tier-pill">R</span><span class="cost-old">$0.09</span><span class="cost-new">$0.001</span></div></div>
+    <div class="session-row"><span class="session-task">Write cold email</span><div class="session-right"><span class="tier-pill">I</span><span class="cost-old">$0.18</span><span class="cost-new">$0.008</span></div></div>
+    <div class="session-row"><span class="session-task">Research competitors</span><div class="session-right"><span class="tier-pill">S</span><span class="cost-old">$0.31</span><span class="cost-new">$0.08</span></div></div>
+    <div class="session-row"><span class="session-task">Architect system design</span><div class="session-right"><span class="tier-pill">E</span><span class="cost-old">$0.89</span><span class="cost-new">$0.89</span></div></div>
+    <div class="session-total"><span class="total-label">Session total</span><div class="total-right"><span class="total-old">$1.47</span><span class="total-new">$0.98</span></div></div>
+    <div class="saving-pct">33% saved — before full optimization kicks in</div>
+  </div>
+</section>
+
+
+<section class="about" id="about">
+  <div class="about-left">
+    <div class="section-num">004 — About</div>
+    <h2 class="about-title">BUILT BY<br>SOMEONE<br>WHO GOT<br>THE BILL.</h2>
+    <p class="about-body">Syntex was built after watching autonomous agents burn through API budgets on work that didn't need premium models. <strong>Nobody was building the layer that should have existed from day one.</strong></p>
+    <p class="about-body">We're in beta. Onboarding early users now. If your team spends over $500/month on AI APIs, we want to hear from you.</p>
+  </div>
+  <div class="about-right">
+    <div class="founder-block">
+      <div class="founder-name">NUBES MCGEE</div>
+      <div class="founder-role">Founder & Inventor</div>
+      <p class="founder-text">Independent AI builder. Identified the AI labor valuation gap through direct experience running autonomous agent workflows. Currently building the MVP with early design partners.</p>
+      <div style="margin-top:24px;display:flex;gap:8px;flex-wrap:wrap;">
+        <span style="font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;background:var(--gray2);color:var(--muted);padding:6px 10px;">AI Infrastructure</span>
+        <span style="font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;background:var(--gray2);color:var(--muted);padding:6px 10px;">Agentic Systems</span>
+        <span style="font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;background:var(--lime);color:var(--black);padding:6px 10px;">Patent Pending</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-block">
+  <div class="cta-bg"><div class="cta-bg-word">SAVE</div></div>
+  <h2 class="cta-title">READY TO<br><span class="lime">STOP THE BLEED?</span></h2>
+  <p class="cta-sub">Beta is open. No subscription. Pay only for what you save.</p>
+  <div class="cta-buttons">
+    <a href="/onboarding.html" class="btn-lime">Start Saving →</a>
+    <a href="mailto:contact@syntexprotocol.com?subject=Syntex Enterprise" style="font-family:var(--mono);font-size:24px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--gray2);padding:16px 32px;display:inline-block;transition:all 0.15s;" onmouseover="this.style.borderColor='#B8FF00';this.style.color='#B8FF00'" onmouseout="this.style.borderColor='var(--gray2)';this.style.color='var(--muted)'">Enterprise →</a>
+  </div>
+  <a href="mailto:contact@syntexprotocol.com" class="cta-email">contact@syntexprotocol.com</a>
+</section>
+
+<footer>
+  <a href="#" class="footer-logo">SYNTEX<span>.</span></a>
+  <div class="footer-copy">© 2026 Syntex. Patent Pending.</div>
+  <ul class="footer-links">
+    <li><a href="#rise">Protocol</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="mailto:contact@syntexprotocol.com">Contact</a></li>
+  </ul>
+</footer>
+
+<script>
+const cursor=document.getElementById('cursor');
+document.addEventListener('mousemove',e=>{cursor.style.left=e.clientX+'px';cursor.style.top=e.clientY+'px';});
+document.querySelectorAll('a,button,.rise-card,.plan,.session-row').forEach(el=>{
+  el.addEventListener('mouseenter',()=>cursor.classList.add('big'));
+  el.addEventListener('mouseleave',()=>cursor.classList.remove('big'));
+});
+
+const counter=document.getElementById('savingsCounter');
+if(counter){
+  // Fetch real savings data
+  fetch('/api/stats')
+    .then(res => res.ok ? res.json() : { total_saved: 0 })
+    .then(stats => {
+      const target = stats.total_saved;
+      const steps=80;let step=0;
+      const ease=t=>t<0.5?2*t*t:-1+(4-2*t)*t;
+      const timer=setInterval(()=>{
+        step++;
+        const val=target*ease(step/steps);
+        counter.textContent='$'+Math.min(val,target).toFixed(2);
+        if(step>=steps){counter.textContent='$'+target.toFixed(2);clearInterval(timer);}
+      },2400/steps);
+    })
+    .catch(err => {
+      console.error('Failed to fetch stats:', err);
+      // Fallback to original animation
+      const target=100.00;const steps=80;let step=0;
+      const ease=t=>t<0.5?2*t*t:-1+(4-2*t)*t;
+      const timer=setInterval(()=>{
+        step++;
+        const val=target*ease(step/steps);
+        counter.textContent='$'+Math.min(val,target).toFixed(2);
+        if(step>=steps){counter.textContent='$'+target.toFixed(2);clearInterval(timer);}
+      },2400/steps);
+    });
+}
+
+const cards=document.querySelectorAll('.rise-card');
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach((e,i)=>{
+    if(e.isIntersecting){
+      setTimeout(()=>{e.target.style.opacity='1';e.target.style.transform='translateY(0)';},i*80);
+      obs.unobserve(e.target);
+    }
+  });
+},{threshold:0.1});
+cards.forEach(c=>{c.style.opacity='0';c.style.transform='translateY(20px)';c.style.transition='opacity 0.4s ease,transform 0.4s ease';obs.observe(c);});
+</script>
+</body>
+</html>

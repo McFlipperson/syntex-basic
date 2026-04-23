@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SYNTEX — Get Started</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --black:#080808;--white:#f0f0f0;--lime:#B8FF00;
+  --gray:#1a1a1a;--gray2:#2a2a2a;--gray3:#444;--muted:#888;
+  --bebas:'Bebas Neue',sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--black);color:var(--white);font-family:var(--mono);overflow-x:hidden;cursor:none;min-height:100vh;}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:998;opacity:0.6;}
+
+/* ── CURSOR ──────────────────────────────────────── */
+.cursor{position:fixed;width:12px;height:12px;background:var(--lime);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform 0.1s;}
+.cursor.big{transform:translate(-50%,-50%) scale(4);background:transparent;border:1px solid var(--lime);}
+
+/* ── NAV ─────────────────────────────────────────── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 32px;border-bottom:1px solid var(--gray2);background:var(--black);}
+.nav-logo{font-family:var(--bebas);font-size:28px;letter-spacing:0.05em;color:var(--white);text-decoration:none;}
+.nav-logo span{color:var(--lime);}
+.nav-test{font-family:var(--mono);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--lime);}
+.nav-step-track{display:flex;align-items:center;gap:6px;}
+.nav-step{width:20px;height:2px;background:var(--gray3);transition:background 0.3s;}
+.nav-step.active{background:var(--lime);}
+.nav-step.done{background:var(--gray2);border-bottom:1px solid var(--gray3);}
+
+/* ── LAYOUT ──────────────────────────────────────── */
+.page{min-height:100vh;padding:100px 0 80px;display:flex;align-items:flex-start;justify-content:center;}
+.container{width:100%;max-width:760px;padding:0 32px;}
+.container.wide{max-width:960px;}
+
+/* ── STEP ─────────────────────────────────────────── */
+.step{display:none;animation:fadeUp 0.35s ease forwards;}
+.step.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+.step-tag{font-family:var(--mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--lime);margin-bottom:16px;display:flex;align-items:center;gap:12px;}
+.step-tag::before{content:'';display:block;width:24px;height:1px;background:var(--lime);}
+.step-title{font-family:var(--bebas);font-size:clamp(48px,8vw,88px);line-height:0.92;letter-spacing:0.01em;color:var(--white);margin-bottom:16px;}
+.step-title .lime{color:var(--lime);}
+.step-sub{font-size:13px;line-height:1.75;color:rgba(240,240,240,0.45);margin-bottom:36px;max-width:540px;}
+.step-sub strong{color:var(--white);}
+
+/* ── BACK BUTTON ─────────────────────────────────── */
+.btn-back{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);background:none;border:none;border-bottom:1px solid var(--gray3);padding-bottom:2px;cursor:none;transition:color 0.15s;margin-bottom:40px;display:inline-block;}
+.btn-back:hover{color:var(--white);}
+
+/* ── PATH CARDS ──────────────────────────────────── */
+.path-grid{display:grid;grid-template-columns:1fr;gap:1px;background:var(--gray2);border:1px solid var(--gray2);margin-bottom:32px;}
+.path-card{background:var(--black);padding:28px 32px;cursor:none;transition:background 0.15s;position:relative;border-left:3px solid transparent;}
+.path-card:hover{background:var(--gray);}
+.path-card.available:hover{border-left-color:var(--lime);}
+.path-card-label{font-family:var(--mono);font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.path-card-title{font-family:var(--bebas);font-size:32px;letter-spacing:0.02em;color:var(--white);margin-bottom:6px;}
+.path-card-desc{font-size:12px;color:var(--muted);line-height:1.6;}
+.path-card-badge{position:absolute;top:28px;right:28px;font-family:var(--mono);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;background:var(--gray2);color:var(--gray3);padding:4px 10px;border:1px solid var(--gray3);}
+.path-card.available .path-card-badge{background:rgba(184,255,0,0.08);color:var(--lime);border-color:rgba(184,255,0,0.3);}
+
+/* ── COMING SOON TOAST ───────────────────────────── */
+.coming-soon-toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:var(--gray);border:1px solid var(--gray3);font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:12px 24px;z-index:200;opacity:0;transition:opacity 0.2s;pointer-events:none;}
+.coming-soon-toast.show{opacity:1;}
+
+/* ── TWO-COL LAYOUT ──────────────────────────────── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:40px;}
+@media(max-width:768px){.two-col{grid-template-columns:1fr;}}
+
+/* ── KVM CARD ────────────────────────────────────── */
+.kvm-card{background:var(--gray);border:1px solid var(--gray3);padding:28px;}
+.kvm-card-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.kvm-card-title{font-family:var(--bebas);font-size:56px;letter-spacing:0.02em;color:var(--white);line-height:1;margin-bottom:4px;}
+.kvm-card-price{font-family:var(--bebas);font-size:32px;color:var(--lime);letter-spacing:0.02em;margin-bottom:20px;}
+.kvm-spec-list{list-style:none;margin-bottom:24px;}
+.kvm-spec-list li{font-size:11px;color:var(--muted);letter-spacing:0.04em;padding:6px 0;border-bottom:1px solid var(--gray2);display:flex;align-items:center;gap:10px;}
+.kvm-spec-list li::before{content:'·';color:var(--lime);font-size:16px;line-height:1;}
+.kvm-spec-list li:last-child{border-bottom:none;}
+.btn-hostinger{display:block;font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;background:var(--lime);color:var(--black);padding:14px 20px;text-decoration:none;text-align:center;font-weight:700;transition:background 0.15s;}
+.btn-hostinger:hover{background:#d4ff33;}
+
+/* ── NUMBERED INSTRUCTIONS ───────────────────────── */
+.inst-list{list-style:none;}
+.inst-item{display:flex;gap:16px;padding:18px 0;border-bottom:1px solid var(--gray2);}
+.inst-item:first-child{border-top:1px solid var(--gray2);}
+.inst-num{font-family:var(--bebas);font-size:28px;color:var(--lime);line-height:1;min-width:28px;}
+.inst-body{flex:1;}
+.inst-text{font-size:12px;color:var(--muted);line-height:1.7;}
+.inst-text strong{color:var(--white);}
+
+/* ── BUTTONS ─────────────────────────────────────── */
+.btn-lime{font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;background:var(--lime);color:var(--black);padding:16px 32px;border:none;font-weight:700;cursor:none;transition:background 0.15s,transform 0.15s;display:block;width:100%;text-align:center;text-decoration:none;}
+.btn-lime:hover{background:#d4ff33;transform:translate(-2px,-2px);}
+.btn-lime:disabled{background:var(--gray3);color:var(--muted);transform:none;cursor:none;}
+
+/* ── RISK SCREEN ─────────────────────────────────── */
+.risk-list{list-style:none;margin-bottom:36px;}
+.risk-item{display:flex;gap:14px;padding:20px 0;border-bottom:1px solid var(--gray2);}
+.risk-item:first-child{border-top:1px solid var(--gray2);}
+.risk-icon{font-family:var(--bebas);font-size:20px;color:var(--lime);min-width:20px;line-height:1.2;}
+.risk-text{font-size:13px;color:rgba(240,240,240,0.6);line-height:1.7;}
+.ack-row{display:flex;align-items:center;gap:12px;margin-bottom:24px;cursor:none;}
+.ack-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--lime);cursor:none;flex-shrink:0;}
+.ack-row label{font-size:12px;letter-spacing:0.06em;color:var(--muted);cursor:none;}
+
+/* ── CODE BLOCK ──────────────────────────────────── */
+.code-block-wrap{position:relative;margin-bottom:32px;}
+.code-block{background:var(--gray);border:1px solid var(--gray2);padding:20px 56px 20px 20px;font-family:var(--mono);font-size:12px;color:var(--lime);word-break:break-all;white-space:pre;line-height:1.65;min-height:60px;}
+.code-block.loading{color:var(--gray3);}
+.code-block.error-state{color:#ff4444;border-color:rgba(255,68,68,0.3);}
+.code-copy-btn{position:absolute;top:12px;right:12px;font-family:var(--mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;background:var(--gray2);border:1px solid var(--gray3);color:var(--muted);padding:6px 10px;cursor:none;transition:all 0.15s;}
+.code-copy-btn:hover{color:var(--lime);border-color:var(--lime);}
+.code-copy-btn.copied{color:var(--lime);border-color:var(--lime);}
+
+/* ── TERMINAL LINK ───────────────────────────────── */
+.terminal-link{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);border:1px solid var(--gray3);padding:12px 20px;text-decoration:none;margin-bottom:12px;transition:all 0.15s;}
+.terminal-link:hover{color:var(--white);border-color:var(--gray3);}
+.install-note{font-size:11px;color:var(--gray3);line-height:1.6;margin-bottom:32px;}
+
+/* ── CONNECTING STATE ────────────────────────────── */
+.connecting-wrap{display:none;margin-bottom:24px;}
+.connecting-wrap.show{display:block;}
+.pulse-row{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
+.pulse-dot{width:10px;height:10px;background:var(--lime);flex-shrink:0;animation:pulse 1.4s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.25;}}
+.connecting-text{font-size:12px;letter-spacing:0.06em;color:var(--white);}
+.skip-link{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray3);background:none;border:none;border-bottom:1px solid var(--gray3);padding-bottom:1px;cursor:none;transition:color 0.15s;}
+.skip-link:hover{color:var(--muted);}
+
+/* ── CREDITS SCREEN ──────────────────────────────── */
+.balance-block{margin-bottom:28px;}
+.balance-label{font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.balance-amount{font-family:var(--bebas);font-size:64px;letter-spacing:2px;color:var(--white);line-height:1;}
+.balance-amount.loading{color:var(--gray3);}
+.amount-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
+.preset{padding:12px 22px;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:0.08em;border:1px solid var(--gray3);background:var(--black);color:var(--muted);cursor:none;transition:all 0.15s;}
+.preset:hover{border-color:var(--muted);color:var(--white);}
+.preset.selected{border-color:var(--lime);color:var(--lime);background:rgba(184,255,0,0.05);}
+.credits-divider{border:none;border-top:1px solid var(--gray2);margin:28px 0;}
+.zero-warning{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;color:#ff8800;border:1px solid rgba(255,136,0,0.3);background:rgba(255,136,0,0.05);padding:10px 14px;margin-bottom:12px;display:none;}
+.zero-warning.show{display:block;}
+.section-label{font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+.banner{padding:10px 14px;font-size:11px;border:1px solid;margin-bottom:16px;display:none;font-family:var(--mono);}
+.banner.visible{display:block;}
+.banner.success{border-color:rgba(184,255,0,0.4);background:rgba(184,255,0,0.06);color:var(--lime);}
+.banner.error{border-color:rgba(239,68,68,0.4);background:rgba(239,68,68,0.06);color:#EF4444;}
+
+/* ── DONE SCREEN ─────────────────────────────────── */
+.done-icon{font-family:var(--bebas);font-size:100px;color:var(--lime);line-height:1;margin-bottom:8px;}
+.divider{height:1px;background:var(--gray2);margin:32px 0;}
+
+/* ── MSG ─────────────────────────────────────────── */
+.msg{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;padding:12px 16px;margin-bottom:16px;display:none;}
+.msg.error{border:1px solid #ff4444;color:#ff4444;background:rgba(255,68,68,0.05);}
+.msg.show{display:block;}
+
+/* ── MOBILE ──────────────────────────────────────── */
+@media(max-width:768px){
+  nav{padding:14px 20px;}
+  .container{padding:0 20px;}
+  .page{padding:90px 0 60px;}
+  .path-card{padding:22px 20px;}
+  .path-card-badge{position:static;margin-top:10px;display:inline-block;}
+  .kvm-card{padding:20px;}
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo">SYNTE<span>X</span></a>
+  <span class="nav-test" id="nav-test-label" style="display:none;">TEST MODE</span>
+  <div class="nav-step-track" id="stepTrack">
+    <div class="nav-step active" id="track-1"></div>
+    <div class="nav-step" id="track-2"></div>
+    <div class="nav-step" id="track-3"></div>
+    <div class="nav-step" id="track-4"></div>
+    <div class="nav-step" id="track-5"></div>
+    <div class="nav-step" id="track-6"></div>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="container wide" id="main-container">
+
+    <!-- ── SCREEN 1: CHOOSE YOUR PATH ───────────── -->
+    <div class="step active" id="step-1">
+      <div class="step-tag">Get started</div>
+      <div class="step-title">CHOOSE YOUR<br><span class="lime">PATH</span></div>
+      <p class="step-sub">Tell us where you're starting from and we'll set everything up for you.</p>
+
+      <div class="path-grid">
+        <div class="path-card available" id="card-new">
+          <div class="path-card-label">Recommended</div>
+          <div class="path-card-title">I'M NEW — SET UP EVERYTHING FOR ME</div>
+          <div class="path-card-desc">No server, no agent, no config. We walk you through the whole thing in under 10 minutes.</div>
+          <div class="path-card-badge">Start here →</div>
+        </div>
+        <div class="path-card" id="card-existing">
+          <div class="path-card-label">Existing setup</div>
+          <div class="path-card-title">I HAVE A SERVER — JUST CONNECT SYNTEX</div>
+          <div class="path-card-desc">You already have a server running. Point it at Syntex and you're done.</div>
+          <div class="path-card-badge">Coming soon</div>
+        </div>
+        <div class="path-card" id="card-oc">
+          <div class="path-card-label">Migration</div>
+          <div class="path-card-title">I'M AN EXISTING OC USER — TRANSFER MY SETUP</div>
+          <div class="path-card-desc">Already using OpenClaw? Import your config and carry on where you left off.</div>
+          <div class="path-card-badge">Coming soon</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCREEN 2: GET YOUR SERVER ────────────── -->
+    <div class="step" id="step-2">
+      <button class="btn-back" id="step2-back">← Back</button>
+      <div class="step-tag">Step 1 of 5</div>
+      <div class="step-title">GET YOUR<br><span class="lime">SERVER</span></div>
+      <p class="step-sub">You'll need a VPS to run your agent. We recommend this exact plan — it's cheap, reliable, and exactly the right size.</p>
+
+      <div class="two-col">
+        <!-- Left: KVM 2 card -->
+        <div>
+          <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Look for this plan on Hostinger</div>
+          <div class="kvm-card">
+            <div class="kvm-card-eyebrow">VPS Hosting</div>
+            <div class="kvm-card-title">KVM 2</div>
+            <div class="kvm-card-price">$8.99/mo</div>
+            <ul class="kvm-spec-list">
+              <li>2 vCPU Core</li>
+              <li>8GB RAM</li>
+              <li>100GB NVMe</li>
+              <li>8TB Bandwidth</li>
+            </ul>
+            <a href="#" target="_blank" rel="noopener" class="btn-hostinger">Get this server →</a>
+          </div>
+        </div>
+
+        <!-- Right: numbered instructions -->
+        <div>
+          <ol class="inst-list">
+            <li class="inst-item">
+              <span class="inst-num">1</span>
+              <div class="inst-body">
+                <div class="inst-text">Click <strong>Plain OS</strong> → select <strong>Ubuntu 24.04 LTS</strong></div>
+              </div>
+            </li>
+            <li class="inst-item">
+              <span class="inst-num">2</span>
+              <div class="inst-body">
+                <div class="inst-text">Select the <strong>KVM 2</strong> plan</div>
+              </div>
+            </li>
+            <li class="inst-item">
+              <span class="inst-num">3</span>
+              <div class="inst-body">
+                <div class="inst-text"><strong>Additional Features</strong> → enable <strong>Malware Scanner</strong> (free) · skip everything else</div>
+              </div>
+            </li>
+            <li class="inst-item">
+              <span class="inst-num">4</span>
+              <div class="inst-body">
+                <div class="inst-text">Set a <strong>root password</strong> · skip the SSH key — Syntex handles this</div>
+              </div>
+            </li>
+            <li class="inst-item">
+              <span class="inst-num">5</span>
+              <div class="inst-body">
+                <div class="inst-text">Click <strong>Finish Setup</strong> · wait ~3 minutes · come back here</div>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </div>
+
+      <button class="btn-lime" id="step2-continue">My server is ready →</button>
+    </div>
+
+    <!-- ── SCREEN 3: RISK ACKNOWLEDGEMENT ───────── -->
+    <div class="step" id="step-3">
+      <button class="btn-back" id="step3-back">← Back</button>
+      <div class="step-tag">Step 2 of 5</div>
+      <div class="step-title">BEFORE WE<br><span class="lime">CONTINUE</span></div>
+      <p class="step-sub">This setup gives Syntex direct access to your server. Make sure you understand what that means.</p>
+
+      <ul class="risk-list">
+        <li class="risk-item">
+          <span class="risk-icon">!</span>
+          <span class="risk-text">This installs software on your server with full root access</span>
+        </li>
+        <li class="risk-item">
+          <span class="risk-icon">!</span>
+          <span class="risk-text">Your AI agent runs autonomously and can take actions on your behalf</span>
+        </li>
+      </ul>
+
+      <label class="ack-row" id="ack-row">
+        <input type="checkbox" id="ack-check">
+        <label for="ack-check" style="cursor:none;">I understand</label>
+      </label>
+
+      <button class="btn-lime" id="risk-continue-btn" disabled>Continue →</button>
+    </div>
+
+    <!-- ── SCREEN 4: INSTALL COMMAND ─────────────── -->
+    <div class="step" id="step-4">
+      <button class="btn-back" id="step4-back">← Back</button>
+      <div class="step-tag">Step 3 of 5</div>
+      <div class="step-title">RUN THIS ON<br><span class="lime">YOUR SERVER.</span></div>
+      <p class="step-sub">Open your Hostinger browser terminal in hPanel, paste this command, and hit Enter.</p>
+
+      <div class="msg error" id="script-error"></div>
+
+      <div class="code-block-wrap">
+        <div class="code-block loading" id="install-cmd">Fetching your personalised command…</div>
+        <button class="code-copy-btn" id="copy-cmd-btn">Copy</button>
+      </div>
+
+      <a href="https://hpanel.hostinger.com" target="_blank" rel="noopener" class="terminal-link">Open Hostinger Terminal →</a>
+
+      <p class="install-note">Installs OpenClaw, the Syntex MCP server, and your agent configuration automatically. Takes about 3 minutes.</p>
+
+      <button class="btn-lime" id="run-btn">I've run the command →</button>
+
+      <!-- Connecting state (shown after clicking above) -->
+      <div class="connecting-wrap" id="connecting-wrap">
+        <div class="pulse-row">
+          <div class="pulse-dot"></div>
+          <span class="connecting-text">Connecting your agent… this usually takes 2–3 minutes.</span>
+        </div>
+        <button class="skip-link" id="connecting-skip">Skip →</button>
+      </div>
+    </div>
+
+    <!-- ── SCREEN 5: LOAD CREDITS ─────────────────── -->
+    <div class="step" id="step-5">
+      <button class="btn-back" id="step5-back">← Back</button>
+      <div class="step-tag">Step 4 of 5</div>
+      <div class="step-title">LOAD<br><span class="lime">CREDITS</span></div>
+      <p class="step-sub">Your first 100 tasks are Syntex fee-free. Credits cover the model cost — without them your agent can't execute tasks.</p>
+
+      <div class="balance-block">
+        <div class="balance-label">Credit Balance</div>
+        <div class="balance-amount loading" id="balance-display">—</div>
+      </div>
+
+      <div id="banner-success" class="banner success">Credits added successfully.</div>
+      <div id="banner-error"   class="banner error"></div>
+
+      <hr class="credits-divider">
+
+      <div class="section-label">Add Credits</div>
+      <div class="amount-row">
+        <button class="preset" data-amount="5">$5</button>
+        <button class="preset" data-amount="10">$10</button>
+        <button class="preset" data-amount="25">$25</button>
+      </div>
+
+      <button class="btn-lime" id="add-credits-btn" style="margin-bottom:16px;" disabled>Add Credits</button>
+
+      <div class="zero-warning" id="zero-warning">Your agent won't be able to execute tasks without credits</div>
+      <button class="btn-lime" id="open-modal-btn" style="background:var(--black);color:var(--white);border:1px solid var(--gray3);">Open Modal →</button>
+    </div>
+
+    <!-- ── SCREEN 6: DONE ─────────────────────────── -->
+    <div class="step" id="step-6">
+      <div class="done-icon">✓</div>
+      <div class="step-title">YOUR AGENT<br><span class="lime">IS ONLINE.</span></div>
+      <p class="step-sub">Say hello. Your agent is ready to work.</p>
+      <div class="divider"></div>
+      <a href="/chat.html" class="btn-lime" style="display:block;text-decoration:none;text-align:center;">Open Chat →</a>
+    </div>
+
+  </div>
+</div>
+
+<!-- Coming soon toast -->
+<div class="coming-soon-toast" id="coming-soon-toast">Coming soon</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────
+const state = {
+  token: localStorage.getItem('syntex_token') || null,
+  installCmd: null,
+  heartbeatInterval: null
+};
+
+// ── CURSOR ─────────────────────────────────────────
+const cursor = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top  = e.clientY + 'px';
+});
+document.addEventListener('mouseenter', () => cursor.style.opacity = '1');
+document.addEventListener('mouseleave', () => cursor.style.opacity = '0');
+function bindCursor() {
+  document.querySelectorAll('button,a,.path-card,.preset,.ack-row,.skip-link').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('big'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+  });
+}
+bindCursor();
+
+// ── EVENT WIRING ───────────────────────────────────
+document.getElementById('card-new').addEventListener('click', () => selectPath('new'));
+document.getElementById('card-existing').addEventListener('click', showComingSoon);
+document.getElementById('card-oc').addEventListener('click', showComingSoon);
+document.getElementById('step2-back').addEventListener('click', () => goToStep(1));
+document.getElementById('step2-continue').addEventListener('click', () => goToStep(3));
+document.getElementById('step3-back').addEventListener('click', () => goToStep(2));
+document.getElementById('ack-check').addEventListener('change', e => toggleAck(e.target.checked));
+document.getElementById('risk-continue-btn').addEventListener('click', () => goToStep(4));
+document.getElementById('step4-back').addEventListener('click', () => goToStep(3));
+document.getElementById('copy-cmd-btn').addEventListener('click', copyInstallCmd);
+document.getElementById('run-btn').addEventListener('click', startConnecting);
+document.getElementById('connecting-skip').addEventListener('click', () => goToStep(5));
+document.getElementById('step5-back').addEventListener('click', () => goToStep(4));
+document.getElementById('open-modal-btn').addEventListener('click', () => goToStep(6));
+
+// ── STEP NAVIGATION ────────────────────────────────
+function goToStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  for (let i = 1; i <= 6; i++) {
+    const t = document.getElementById('track-' + i);
+    if (t) t.className = 'nav-step' + (i === n ? ' active' : (i < n ? ' done' : ''));
+  }
+  window.scrollTo(0, 0);
+
+  if (n === 4) initStep4();
+  if (n === 5) initStep5();
+}
+
+// ── PATH SELECTION ─────────────────────────────────
+function selectPath(type) {
+  if (type === 'new') goToStep(2);
+}
+
+// ── COMING SOON ────────────────────────────────────
+let toastTimeout;
+function showComingSoon() {
+  const toast = document.getElementById('coming-soon-toast');
+  toast.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// ── RISK ACK ───────────────────────────────────────
+function toggleAck(checked) {
+  document.getElementById('risk-continue-btn').disabled = !checked;
+}
+
+// ── STEP 4: SHOW INSTALL COMMAND ───────────────────
+function initStep4() {
+  const cmdEl  = document.getElementById('install-cmd');
+  const errEl  = document.getElementById('script-error');
+  errEl.className   = 'msg error';
+  document.getElementById('run-btn').style.display    = 'block';
+  document.getElementById('connecting-wrap').className = 'connecting-wrap';
+
+  const installUrl = localStorage.getItem('syntex_install_url');
+  if (!installUrl) {
+    cmdEl.textContent = 'Install URL not found. Please restart the setup or contact support.';
+    cmdEl.className   = 'code-block error-state';
+    state.installCmd  = null;
+    return;
+  }
+
+  state.installCmd  = `curl -fsSL https://syntexprotocol.com${installUrl} | sudo bash`;
+  cmdEl.textContent = state.installCmd;
+  cmdEl.className   = 'code-block';
+}
+
+// ── COPY INSTALL CMD ───────────────────────────────
+function copyInstallCmd() {
+  const text = state.installCmd || document.getElementById('install-cmd').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copy-cmd-btn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ── STEP 4: CONNECT + POLL HEARTBEAT ───────────────
+function startConnecting() {
+  document.getElementById('run-btn').style.display    = 'none';
+  document.getElementById('step4-back').style.display = 'none';
+  document.getElementById('connecting-wrap').className = 'connecting-wrap show';
+
+  clearInterval(state.heartbeatInterval);
+  state.heartbeatInterval = setInterval(async () => {
+    try {
+      const res = await fetch('/api/auth/heartbeat', {
+        headers: { 'Authorization': 'Bearer ' + state.token }
+      });
+      if (res.ok) {
+        clearInterval(state.heartbeatInterval);
+        goToStep(5);
+      }
+    } catch (err) {
+      // keep polling
+    }
+  }, 5000);
+}
+
+// ── STEP 5: LOAD BALANCE ───────────────────────────
+async function initStep5() {
+  const balEl = document.getElementById('balance-display');
+  balEl.textContent = '—';
+  balEl.className   = 'balance-amount loading';
+
+  // Handle Stripe return
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('deposit') === 'success') {
+    document.getElementById('banner-success').classList.add('visible');
+    history.replaceState(null, '', window.location.pathname);
+  }
+
+  try {
+    const res  = await fetch('/api/user', {
+      headers: { 'Authorization': 'Bearer ' + state.token }
+    });
+    if (res.status === 401) { redirectToLogin(); return; }
+    const data = await res.json();
+    const bal  = parseFloat(data.credit_balance) || 0;
+    balEl.textContent = '$' + bal.toFixed(2);
+    balEl.className   = 'balance-amount';
+    if (bal === 0) document.getElementById('zero-warning').classList.add('show');
+    else           document.getElementById('zero-warning').classList.remove('show');
+  } catch (err) {
+    balEl.textContent = '—';
+    balEl.className   = 'balance-amount';
+  }
+}
+
+// ── CREDITS: PRESET SELECTION ──────────────────────
+let selectedAmount = null;
+document.querySelectorAll('.preset').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.preset').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedAmount = parseFloat(btn.dataset.amount);
+    document.getElementById('add-credits-btn').disabled = false;
+  });
+});
+
+// ── CREDITS: STRIPE CHECKOUT ───────────────────────
+document.getElementById('add-credits-btn').addEventListener('click', async () => {
+  const errBanner = document.getElementById('banner-error');
+  errBanner.classList.remove('visible');
+
+  if (!selectedAmount) return;
+
+  const btn = document.getElementById('add-credits-btn');
+  btn.disabled    = true;
+  btn.textContent = 'PROCESSING...';
+
+  try {
+    const res  = await fetch('/api/stripe/checkout', {
+      method:  'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + state.token
+      },
+      body: JSON.stringify({ amount: selectedAmount, successUrl: window.location.href + '?deposit=success', cancelUrl: window.location.href })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      errBanner.textContent = data.error || 'Checkout failed. Please try again.';
+      errBanner.classList.add('visible');
+      btn.disabled    = false;
+      btn.textContent = 'ADD CREDITS';
+      return;
+    }
+
+    window.location.href = data.url;
+
+  } catch (err) {
+    errBanner.textContent = 'Network error. Please try again.';
+    errBanner.classList.add('visible');
+    btn.disabled    = false;
+    btn.textContent = 'ADD CREDITS';
+  }
+});
+
+// ── UTILS ──────────────────────────────────────────
+function showMsg(id, text, type) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className   = 'msg ' + type + ' show';
+}
+
+function redirectToLogin() {
+  window.location.href = '/onboarding.html?login=1';
+}
+
+// ── TEST MODE BYPASS ───────────────────────────────
+async function testGuestSignup() {
+  const email = 'guest_' + Date.now() + '@test.syntex';
+  try {
+    const res  = await fetch('/api/auth/signup', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email, password: 'test123', username: 'Guest' })
+    });
+    const data = await res.json();
+    if (!res.ok) return;
+    state.token = data.syntexToken;
+    localStorage.setItem('syntex_token', state.token);
+    if (data.installUrl) localStorage.setItem('syntex_install_url', data.installUrl);
+  } catch (err) {
+    // Non-fatal in test mode
+  }
+}
+
+// ── INIT ───────────────────────────────────────────
+(async function init() {
+  // If no token, auto-create guest account (TEST MODE)
+  if (!state.token) {
+    document.getElementById('nav-test-label').style.display = 'inline';
+    await testGuestSignup();
+    // If still no token after bypass attempt, redirect
+    if (!state.token) {
+      redirectToLogin();
+      return;
+    }
+  }
+
+  // Handle Stripe return to step 5
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('deposit') === 'success') {
+    goToStep(5);
+  }
+})();
+</script>
+</body>
+</html>

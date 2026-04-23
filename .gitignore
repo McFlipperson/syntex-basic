@@ -1,0 +1,14 @@
+node_modules
+dist
+.next
+.vercel
+.env
+.env.local
+.env.*.local
+*.log
+.DS_Store
+coverage
+.turbo
+pnpm-debug.log
+package-lock.json
+.claude/
