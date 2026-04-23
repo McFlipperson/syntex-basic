@@ -4,7 +4,6 @@ import { applyCors, json, readJsonBody } from "../../lib/http.js";
 import { createUser, findUserByEmail, upsertVpsRegistration } from "../../lib/db.js";
 import { generateApiToken, hashPassword, makeSessionCookie } from "../../lib/auth.js";
 import { createTunnelForUser } from "../../lib/cloudflare.js";
-import { redis } from "../../lib/redis.js";
 
 interface Body {
   email?: string;
@@ -40,9 +39,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     tunnelHostname: tunnel.hostname,
     gatewayToken,
     installToken,
+    tunnelToken: tunnel.tunnelToken,
   });
-
-  await redis.set(`tunnel-token:${installToken}`, tunnel.tunnelToken, { ex: 60 * 60 * 24 });
 
   res.setHeader("Set-Cookie", makeSessionCookie(user.id));
   json(res, 200, {

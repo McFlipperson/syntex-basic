@@ -11,12 +11,6 @@ export const env = {
   get DATABASE_URL() {
     return req("DATABASE_URL");
   },
-  get UPSTASH_REDIS_REST_URL() {
-    return req("UPSTASH_REDIS_REST_URL");
-  },
-  get UPSTASH_REDIS_REST_TOKEN() {
-    return req("UPSTASH_REDIS_REST_TOKEN");
-  },
   get CLOUDFLARE_ACCOUNT_ID() {
     return req("CLOUDFLARE_ACCOUNT_ID");
   },

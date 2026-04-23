@@ -53,7 +53,7 @@ export class SyntexApi {
     });
   }
 
-  async sendMessage(params: { message: string; model?: string }): Promise<{ runId: string }> {
+  async streamMessage(params: { message: string; model?: string }): Promise<ReadableStream<Uint8Array>> {
     const res = await fetch(this.url("/api/chat/send"), {
       method: "POST",
       credentials: "include",
@@ -64,10 +64,7 @@ export class SyntexApi {
       const body = await res.json().catch(() => ({}));
       throw new Error(body.error ?? `HTTP_${res.status}`);
     }
-    return (await res.json()) as { runId: string };
-  }
-
-  streamUrl(runId: string): string {
-    return this.url(`/api/sse/stream?runId=${encodeURIComponent(runId)}`);
+    if (!res.body) throw new Error("NO_STREAM");
+    return res.body;
   }
 }

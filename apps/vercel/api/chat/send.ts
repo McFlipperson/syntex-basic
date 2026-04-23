@@ -1,10 +1,9 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { randomUUID } from "node:crypto";
-import { applyCors, json, readJsonBody } from "../../lib/http.js";
+import { applyCors, readJsonBody } from "../../lib/http.js";
 import { requireUser } from "../../lib/auth.js";
 import { getVpsRegistration, setCurrentModel } from "../../lib/db.js";
 import { OcClient } from "../../lib/oc-client.js";
-import { pushChatEvent } from "../../lib/redis.js";
 import { MODEL_IDS } from "@syntex/protocol";
 
 interface Body {
@@ -12,20 +11,54 @@ interface Body {
   model?: string;
 }
 
+function sse(res: ServerResponse, data: unknown): void {
+  res.write(`data: ${JSON.stringify(data)}\n\n`);
+}
+
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
   if (applyCors(req, res)) return;
-  if (req.method !== "POST") return json(res, 405, { error: "METHOD_NOT_ALLOWED" });
+  if (req.method !== "POST") {
+    res.statusCode = 405;
+    res.end("METHOD_NOT_ALLOWED");
+    return;
+  }
 
   const user = await requireUser(req, res);
   if (!user) return;
 
   const body = await readJsonBody<Body>(req).catch(() => ({}) as Body);
   const message = (body.message ?? "").trim();
-  if (!message) return json(res, 400, { error: "EMPTY_MESSAGE" });
+  if (!message) {
+    res.statusCode = 400;
+    res.end(JSON.stringify({ error: "EMPTY_MESSAGE" }));
+    return;
+  }
 
   const reg = await getVpsRegistration(user.id);
-  if (!reg) return json(res, 412, { error: "NO_VPS_REGISTERED" });
-  if (!reg.registered_at) return json(res, 412, { error: "VPS_NOT_ONLINE" });
+  if (!reg) {
+    res.statusCode = 412;
+    res.end(JSON.stringify({ error: "NO_VPS_REGISTERED" }));
+    return;
+  }
+  if (!reg.registered_at) {
+    res.statusCode = 412;
+    res.end(JSON.stringify({ error: "VPS_NOT_ONLINE" }));
+    return;
+  }
+
+  // Switch to SSE — stream events directly back to the browser, no Redis needed
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache, no-transform");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("X-Accel-Buffering", "no");
+  res.flushHeaders?.();
+
+  let closed = false;
+  req.on("close", () => { closed = true; });
+
+  const heartbeat = setInterval(() => {
+    if (!closed) res.write(": keepalive\n\n");
+  }, 15_000);
 
   const nextModel = body.model && MODEL_IDS.has(body.model) ? body.model : null;
   const sessionKey = `agent:main:${user.id}`;
@@ -36,31 +69,16 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     clientId: `syntex-vercel-${user.id.slice(0, 8)}`,
   });
 
-  const runIdHolder: { runId: string | null } = { runId: null };
-  const finishedHolder: { finished: boolean } = { finished: false };
-
+  let runIdFilter: string | null = null;
   let finalize: () => void = () => {};
-  const completion = new Promise<void>((resolve) => {
-    finalize = () => {
-      if (!finishedHolder.finished) {
-        finishedHolder.finished = true;
-        resolve();
-      }
-    };
-  });
+  const completion = new Promise<void>((resolve) => { finalize = resolve; });
 
   await client.connect({
-    onEvent: async (frame) => {
+    onEvent: (frame) => {
       if (frame.event !== "chat" && frame.event !== "chat.side_result") return;
-      const payload = frame.payload as {
-        runId: string;
-        state: string;
-      };
-      if (runIdHolder.runId && payload.runId !== runIdHolder.runId) return;
-      await pushChatEvent(user.id, payload.runId, {
-        event: frame.event,
-        payload: frame.payload,
-      });
+      const payload = frame.payload as { runId: string; state: string };
+      if (runIdFilter && payload.runId !== runIdFilter) return;
+      if (!closed) sse(res, { event: frame.event, payload: frame.payload });
       if (payload.state === "final" || payload.state === "error" || payload.state === "aborted") {
         finalize();
       }
@@ -79,19 +97,21 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       idempotencyKey: randomUUID(),
       deliver: false,
     });
-    runIdHolder.runId = ack.runId;
+    runIdFilter = ack.runId;
 
-    // Respond to the browser immediately; the SSE stream for this runId will carry the reply.
-    json(res, 200, { runId: ack.runId });
-
-    const timeout = setTimeout(finalize, 55_000);
+    const timeout = setTimeout(finalize, 290_000);
     await completion;
     clearTimeout(timeout);
   } catch (err) {
-    if (!res.writableEnded) {
-      json(res, 502, { error: "OC_UPSTREAM_FAILURE", detail: String(err) });
+    if (!closed) {
+      sse(res, { event: "error", payload: { state: "error", errorMessage: String(err) } });
     }
   } finally {
+    clearInterval(heartbeat);
     client.close();
+    if (!closed) {
+      res.write("event: end\ndata: {}\n\n");
+      res.end();
+    }
   }
 }

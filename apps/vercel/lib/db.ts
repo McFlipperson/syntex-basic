@@ -21,6 +21,7 @@ export interface VpsRegistrationRow {
   install_token: string;
   registered_at: string | null;
   current_model: string;
+  tunnel_token: string | null;
 }
 
 export async function findUserByEmail(email: string): Promise<UserRow | null> {
@@ -65,7 +66,7 @@ export async function createUser(
 export async function getVpsRegistration(userId: string): Promise<VpsRegistrationRow | null> {
   const rows = (await sql`
     SELECT user_id, tunnel_hostname, gateway_token, install_token,
-           registered_at, current_model
+           registered_at, current_model, tunnel_token
     FROM vps_registrations WHERE user_id = ${userId}
   `) as VpsRegistrationRow[];
   return rows[0] ?? null;
@@ -76,7 +77,7 @@ export async function getVpsByInstallToken(
 ): Promise<VpsRegistrationRow | null> {
   const rows = (await sql`
     SELECT user_id, tunnel_hostname, gateway_token, install_token,
-           registered_at, current_model
+           registered_at, current_model, tunnel_token
     FROM vps_registrations WHERE install_token = ${installToken}
   `) as VpsRegistrationRow[];
   return rows[0] ?? null;
@@ -87,16 +88,18 @@ export async function upsertVpsRegistration(params: {
   tunnelHostname: string;
   gatewayToken: string;
   installToken: string;
+  tunnelToken: string;
 }): Promise<void> {
   await sql`
     INSERT INTO vps_registrations
-      (user_id, tunnel_hostname, gateway_token, install_token)
+      (user_id, tunnel_hostname, gateway_token, install_token, tunnel_token)
     VALUES
-      (${params.userId}, ${params.tunnelHostname}, ${params.gatewayToken}, ${params.installToken})
+      (${params.userId}, ${params.tunnelHostname}, ${params.gatewayToken}, ${params.installToken}, ${params.tunnelToken})
     ON CONFLICT (user_id) DO UPDATE SET
       tunnel_hostname = EXCLUDED.tunnel_hostname,
       gateway_token = EXCLUDED.gateway_token,
       install_token = EXCLUDED.install_token,
+      tunnel_token = EXCLUDED.tunnel_token,
       registered_at = NULL
   `;
 }

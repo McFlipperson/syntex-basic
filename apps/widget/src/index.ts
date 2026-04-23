@@ -2,7 +2,7 @@ import { MODEL_OPTIONS, DEFAULT_MODEL_ID } from "@syntex/protocol";
 import { resolveConfig } from "./config.js";
 import { SyntexApi, type SessionState } from "./api.js";
 import { CSS } from "./styles.js";
-import { openStream } from "./sse.js";
+import { readStream } from "./sse.js";
 
 type ChatMsg =
   | { role: "user"; text: string }
@@ -245,11 +245,10 @@ async function sendMessage(text: string): Promise<void> {
   render();
 
   try {
-    const { runId } = await api.sendMessage({
+    const stream = await api.streamMessage({
       message: text,
       model: state.currentModel,
     });
-    const streamUrl = api.streamUrl(runId);
     await new Promise<void>((resolve) => {
       let bufferedText = "";
       let replaced = false;
@@ -259,7 +258,7 @@ async function sendMessage(text: string): Promise<void> {
         else state.messages.push(msg);
         replaced = true;
       };
-      const cleanup = openStream(streamUrl, {
+      const cleanup = readStream(stream, {
         onData: (d) => {
           if (d.event !== "chat" && d.event !== "chat.side_result") return;
           const msgBody = extractText(d.payload.message);
