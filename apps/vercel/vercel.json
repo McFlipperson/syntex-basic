@@ -1,11 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "outputDirectory": ".",
   "functions": {
     "api/sse/stream.ts": {
       "maxDuration": 300
     },
     "api/chat/send.ts": {
-      "maxDuration": 60
+      "maxDuration": 300
     },
     "api/v1/chat/completions.ts": {
       "maxDuration": 300
