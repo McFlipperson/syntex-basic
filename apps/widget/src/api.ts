@@ -32,7 +32,10 @@ export class SyntexApi {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? "LOGIN_FAILED");
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error ?? `LOGIN_FAILED (HTTP ${res.status})`);
+    }
   }
 
   async signup(email: string, password: string): Promise<{ installUrl: string }> {
@@ -42,7 +45,10 @@ export class SyntexApi {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? "SIGNUP_FAILED");
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error ?? `SIGNUP_FAILED (HTTP ${res.status})`);
+    }
     return (await res.json()) as { installUrl: string };
   }
 
