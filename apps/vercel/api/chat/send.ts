@@ -64,7 +64,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   const sessionKey = `agent:main:${user.id}`;
 
   const client = new OcClient({
-    url: `wss://${reg.tunnel_hostname}/ws`,
+    url: `wss://${reg.tunnel_hostname}/__openclaw__/ws`,
     token: reg.gateway_token,
     clientId: `syntex-vercel-${user.id.slice(0, 8)}`,
   });
