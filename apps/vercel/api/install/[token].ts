@@ -133,12 +133,17 @@ cat > /root/.openclaw/.env <<EOF
 SYNTEX_CREDIT_TOKEN=\${SYNTEX_CREDIT_TOKEN}
 EOF
 
-# --- Non-interactive onboard (best-effort; controlled by flags) ---
-openclaw onboard --non-interactive --accept-risk \\
+# --- Non-interactive onboard ---
+openclaw onboard --non-interactive \\
   --mode local \\
   --auth-choice custom-api-key \\
   --custom-base-url "\${SYNTEX_V1_BASE_URL}" \\
+  --custom-model-id "anthropic/claude-sonnet-4-6" \\
+  --custom-api-key "\${SYNTEX_CREDIT_TOKEN}" \\
+  --custom-provider-id "syntex" \\
   --custom-compatibility openai \\
+  --gateway-port 18789 \\
+  --gateway-bind loopback \\
   --gateway-auth token \\
   --gateway-token "\${SYNTEX_GATEWAY_TOKEN}" \\
   --skip-health || true
