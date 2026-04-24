@@ -36,6 +36,9 @@ export class OcClient {
     const ws = new WebSocket(this.config.url, {
       handshakeTimeout: 10_000,
       perMessageDeflate: false,
+      headers: {
+        Authorization: `Bearer ${this.config.token}`,
+      },
     });
     this.ws = ws;
 

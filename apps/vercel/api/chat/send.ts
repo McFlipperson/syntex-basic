@@ -73,19 +73,19 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   let finalize: () => void = () => {};
   const completion = new Promise<void>((resolve) => { finalize = resolve; });
 
-  await client.connect({
-    onEvent: (frame) => {
-      if (frame.event !== "chat" && frame.event !== "chat.side_result") return;
-      const payload = frame.payload as { runId: string; state: string };
-      if (runIdFilter && payload.runId !== runIdFilter) return;
-      if (!closed) sse(res, { event: frame.event, payload: frame.payload });
-      if (payload.state === "final" || payload.state === "error" || payload.state === "aborted") {
-        finalize();
-      }
-    },
-  });
-
   try {
+    await client.connect({
+      onEvent: (frame) => {
+        if (frame.event !== "chat" && frame.event !== "chat.side_result") return;
+        const payload = frame.payload as { runId: string; state: string };
+        if (runIdFilter && payload.runId !== runIdFilter) return;
+        if (!closed) sse(res, { event: frame.event, payload: frame.payload });
+        if (payload.state === "final" || payload.state === "error" || payload.state === "aborted") {
+          finalize();
+        }
+      },
+    });
+
     if (nextModel && nextModel !== reg.current_model) {
       await client.sessionsPatch({ key: sessionKey, model: nextModel });
       await setCurrentModel(user.id, nextModel);
