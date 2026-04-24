@@ -118,9 +118,22 @@ cat > /root/.openclaw/openclaw.json <<EOF
   "models": {
     "providers": {
       "syntex": {
-        "kind": "openai-compatible",
         "baseUrl": "\${SYNTEX_V1_BASE_URL}",
-        "apiKeyRef": { "env": "SYNTEX_CREDIT_TOKEN" }
+        "api": "openai-completions",
+        "auth": "api-key",
+        "apiKey": { "source": "env", "provider": "default", "id": "SYNTEX_CREDIT_TOKEN" },
+        "models": [
+          {
+            "id": "anthropic/claude-sonnet-4-6",
+            "name": "Claude Sonnet 4.6",
+            "api": "openai-completions",
+            "reasoning": false,
+            "input": ["text"],
+            "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 },
+            "contextWindow": 200000,
+            "maxTokens": 8192
+          }
+        ]
       }
     }
   }
