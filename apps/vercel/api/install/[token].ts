@@ -147,7 +147,7 @@ SYNTEX_CREDIT_TOKEN=\${SYNTEX_CREDIT_TOKEN}
 EOF
 
 # --- Non-interactive onboard ---
-openclaw onboard --non-interactive \\
+openclaw onboard --non-interactive --accept-risk \\
   --mode local \\
   --auth-choice custom-api-key \\
   --custom-base-url "\${SYNTEX_V1_BASE_URL}" \\
@@ -159,7 +159,7 @@ openclaw onboard --non-interactive \\
   --gateway-bind loopback \\
   --gateway-auth token \\
   --gateway-token "\${SYNTEX_GATEWAY_TOKEN}" \\
-  --skip-health || true
+  --skip-health
 
 # --- systemd unit for OpenClaw gateway ---
 cat > /etc/systemd/system/openclaw-gateway.service <<'UNIT'
@@ -172,7 +172,7 @@ Type=simple
 User=root
 Environment=OPENCLAW_GATEWAY_TOKEN=__TOKEN__
 Environment=SYNTEX_CREDIT_TOKEN=__CREDIT_TOKEN__
-ExecStart=/usr/bin/openclaw gateway start
+ExecStart=/usr/bin/openclaw gateway run
 Restart=always
 RestartSec=3
 
