@@ -111,7 +111,7 @@ command -v openclaw >/dev/null 2>&1 || { echo "openclaw not found after install"
 
 # --- Run OC's onboard — writes the config only. We install a system-level
 # systemd unit ourselves because onboard wants a user session (unavailable
-# under `curl | sudo bash`), and its --install-daemon path silently no-ops.
+# under curl-pipe-sudo-bash), and its --install-daemon path silently no-ops.
 openclaw onboard --non-interactive --accept-risk \\
   --mode local \\
   --auth-choice custom-api-key \\
