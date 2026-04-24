@@ -66,16 +66,7 @@ export async function createTunnelForUser(params: {
     }),
   });
 
-  const zone = await resolveZoneId(root);
-  await cf(`/zones/${zone}/dns_records`, {
-    method: "POST",
-    body: JSON.stringify({
-      type: "CNAME",
-      name: subdomain,
-      content: `${tunnel.id}.cfargotunnel.com`,
-      proxied: true,
-    }),
-  });
+  await ensureTunnelDns({ hostname, tunnelId: tunnel.id, rootDomain: root });
 
   const token = await cf<string>(`/accounts/${accountId}/cfd_tunnel/${tunnel.id}/token`);
 
@@ -84,6 +75,56 @@ export async function createTunnelForUser(params: {
     tunnelToken: token,
     hostname,
   };
+}
+
+// Idempotent CNAME upsert. Creates the record if missing, updates it if the
+// target drifted, leaves it alone if already correct. Safe to call on every
+// register-vps so users whose signup DNS write failed self-heal.
+export async function ensureTunnelDns(params: {
+  hostname: string;
+  tunnelId: string;
+  rootDomain: string;
+}): Promise<void> {
+  const zone = await resolveZoneId(params.rootDomain);
+  const target = `${params.tunnelId}.cfargotunnel.com`;
+
+  const existing = await cf<Array<{ id: string; type: string; content: string }>>(
+    `/zones/${zone}/dns_records?type=CNAME&name=${encodeURIComponent(params.hostname)}`,
+  );
+
+  if (existing.length === 0) {
+    await cf(`/zones/${zone}/dns_records`, {
+      method: "POST",
+      body: JSON.stringify({
+        type: "CNAME",
+        name: params.hostname,
+        content: target,
+        proxied: true,
+      }),
+    });
+    return;
+  }
+
+  const record = existing[0]!;
+  if (record.content !== target) {
+    await cf(`/zones/${zone}/dns_records/${record.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ content: target, proxied: true }),
+    });
+  }
+}
+
+// Decodes a cloudflared tunnel token (base64 JSON with { a, t, s }) to
+// recover the tunnel id. We don't store tunnel_id separately in the db,
+// but it's embedded in tunnel_token.
+export function tunnelIdFromToken(token: string): string | null {
+  try {
+    const decoded = Buffer.from(token, "base64").toString("utf-8");
+    const parsed = JSON.parse(decoded) as { t?: string };
+    return parsed.t ?? null;
+  } catch {
+    return null;
+  }
 }
 
 async function resolveZoneId(rootDomain: string): Promise<string> {
