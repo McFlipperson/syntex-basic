@@ -99,54 +99,7 @@ fi
 # --- OpenClaw ---
 npm install -g openclaw >/dev/null
 
-# Write the minimal gateway config — controlUi origin allowlist, token-only auth.
-mkdir -p /root/.openclaw
-cat > /root/.openclaw/openclaw.json <<EOF
-{
-  "gateway": {
-    "auth": {
-      "mode": "token",
-      "token": "\${SYNTEX_GATEWAY_TOKEN}"
-    },
-    "controlUi": {
-      "dangerouslyDisableDeviceAuth": true,
-      "allowedOrigins": ["\${SYNTEX_ALLOWED_ORIGIN}"]
-    },
-    "bind": "loopback",
-    "port": 18789
-  },
-  "models": {
-    "providers": {
-      "syntex": {
-        "baseUrl": "\${SYNTEX_V1_BASE_URL}",
-        "api": "openai-completions",
-        "auth": "api-key",
-        "apiKey": { "source": "env", "provider": "default", "id": "SYNTEX_CREDIT_TOKEN" },
-        "models": [
-          {
-            "id": "anthropic/claude-sonnet-4-6",
-            "name": "Claude Sonnet 4.6",
-            "api": "openai-completions",
-            "reasoning": false,
-            "input": ["text"],
-            "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 },
-            "contextWindow": 200000,
-            "maxTokens": 8192
-          }
-        ]
-      }
-    }
-  }
-}
-EOF
-
-# --- Write env file for OC to use as model provider key ---
-mkdir -p /root/.openclaw
-cat > /root/.openclaw/.env <<EOF
-SYNTEX_CREDIT_TOKEN=\${SYNTEX_CREDIT_TOKEN}
-EOF
-
-# --- Non-interactive onboard ---
+# --- Run OC's onboard — it writes openclaw.json AND installs the systemd unit ---
 openclaw onboard --non-interactive --accept-risk \\
   --mode local \\
   --auth-choice custom-api-key \\
@@ -161,29 +114,19 @@ openclaw onboard --non-interactive --accept-risk \\
   --gateway-token "\${SYNTEX_GATEWAY_TOKEN}" \\
   --skip-health
 
-# --- systemd unit for OpenClaw gateway ---
-cat > /etc/systemd/system/openclaw-gateway.service <<'UNIT'
-[Unit]
-Description=OpenClaw Gateway
-After=network-online.target
+# --- Patch CORS allowlist into onboard-generated config ---
+# onboard doesn't have flags for controlUi.allowedOrigins or
+# dangerouslyDisableDeviceAuth, so we add them with jq after it runs.
+CFG=/root/.openclaw/openclaw.json
+tmp=$(mktemp)
+jq --arg origin "\${SYNTEX_ALLOWED_ORIGIN}" '
+  .gateway.controlUi = (.gateway.controlUi // {})
+  | .gateway.controlUi.dangerouslyDisableDeviceAuth = true
+  | .gateway.controlUi.allowedOrigins = [$origin]
+' "\$CFG" > "\$tmp" && mv "\$tmp" "\$CFG"
 
-[Service]
-Type=simple
-User=root
-Environment=OPENCLAW_GATEWAY_TOKEN=__TOKEN__
-Environment=SYNTEX_CREDIT_TOKEN=__CREDIT_TOKEN__
-ExecStart=/usr/bin/openclaw gateway run
-Restart=always
-RestartSec=3
-
-[Install]
-WantedBy=multi-user.target
-UNIT
-sed -i "s|__TOKEN__|\${SYNTEX_GATEWAY_TOKEN}|g" /etc/systemd/system/openclaw-gateway.service
-sed -i "s|__CREDIT_TOKEN__|\${SYNTEX_CREDIT_TOKEN}|g" /etc/systemd/system/openclaw-gateway.service
-
-systemctl daemon-reload
-systemctl enable --now openclaw-gateway.service
+# Restart the onboard-managed service to pick up the patched config
+systemctl restart openclaw-gateway.service || systemctl start openclaw-gateway.service
 
 # --- cloudflared tunnel (token baked in at signup) ---
 TUNNEL_TOKEN_URL="\${SYNTEX_API_ORIGIN}/api/install-tunnel-token/\${SYNTEX_INSTALL_TOKEN}"
