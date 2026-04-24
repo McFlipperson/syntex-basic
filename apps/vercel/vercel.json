@@ -13,7 +13,7 @@
     }
   },
   "routes": [
-    { "src": "/",                  "dest": "/onboarding.html" },
+    { "src": "/",                  "dest": "/SYNTEX2.0.html" },
     { "src": "/icon-192.png",      "dest": "/icon-192.png" },
     { "src": "/manifest.json",    "dest": "/manifest.json" },
     { "src": "/sw.js",            "dest": "/sw.js",            "headers": { "Cache-Control": "no-cache" } },
