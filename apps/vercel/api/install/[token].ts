@@ -20,10 +20,16 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     return;
   }
 
+  // Fetch the user's api_token to use as the model provider key
+  const { sql } = await import("../../lib/db.js");
+  const rows = await sql`SELECT api_token FROM users WHERE id = ${reg.user_id}` as { api_token: string }[];
+  const apiToken = rows[0]?.api_token ?? "";
+
   const vars: Record<string, string> = {
     SYNTEX_API_ORIGIN: env.PUBLIC_API_ORIGIN,
     SYNTEX_INSTALL_TOKEN: reg.install_token,
     SYNTEX_GATEWAY_TOKEN: reg.gateway_token,
+    SYNTEX_CREDIT_TOKEN: apiToken,
     SYNTEX_V1_BASE_URL: `${env.PUBLIC_API_ORIGIN}/v1`,
     SYNTEX_ALLOWED_ORIGIN: env.PUBLIC_SITE_ORIGIN,
     SYNTEX_TUNNEL_HOSTNAME: reg.tunnel_hostname,
@@ -121,6 +127,12 @@ cat > /root/.openclaw/openclaw.json <<EOF
 }
 EOF
 
+# --- Write env file for OC to use as model provider key ---
+mkdir -p /root/.openclaw
+cat > /root/.openclaw/.env <<EOF
+SYNTEX_CREDIT_TOKEN=\${SYNTEX_CREDIT_TOKEN}
+EOF
+
 # --- Non-interactive onboard (best-effort; controlled by flags) ---
 openclaw onboard --non-interactive --accept-risk \\
   --mode local \\
@@ -141,6 +153,7 @@ After=network-online.target
 Type=simple
 User=root
 Environment=OPENCLAW_GATEWAY_TOKEN=__TOKEN__
+Environment=SYNTEX_CREDIT_TOKEN=__CREDIT_TOKEN__
 ExecStart=/usr/bin/openclaw gateway start
 Restart=always
 RestartSec=3
@@ -149,6 +162,7 @@ RestartSec=3
 WantedBy=multi-user.target
 UNIT
 sed -i "s|__TOKEN__|\${SYNTEX_GATEWAY_TOKEN}|g" /etc/systemd/system/openclaw-gateway.service
+sed -i "s|__CREDIT_TOKEN__|\${SYNTEX_CREDIT_TOKEN}|g" /etc/systemd/system/openclaw-gateway.service
 
 systemctl daemon-reload
 systemctl enable --now openclaw-gateway.service
