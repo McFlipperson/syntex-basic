@@ -109,6 +109,10 @@ for candidate in /root/.local/bin /root/.openclaw/bin /usr/local/bin; do
 done
 command -v openclaw >/dev/null 2>&1 || { echo "openclaw not found after install" >&2; exit 1; }
 
+# onboard installs a user-level systemd unit, which requires lingering on
+# for the target user or the install silently skips.
+loginctl enable-linger root 2>/dev/null || true
+
 # --- Run OC's onboard — writes config AND installs its own systemd daemon ---
 openclaw onboard --non-interactive --accept-risk \\
   --mode local \\
@@ -139,16 +143,20 @@ jq --arg origin "\${SYNTEX_ALLOWED_ORIGIN}" '
 ' "\$CFG" > "\$tmp" && mv "\$tmp" "\$CFG"
 
 # Restart the onboard-managed service to pick up the patched config.
-# Service name varies by OC version — detect it.
-OC_SERVICE=""
+# Service name and scope (system vs user) varies by OC version — detect both.
+OC_SERVICE=""; OC_SCOPE=""
 for svc in openclaw openclaw-daemon openclaw-gateway oc-daemon oc-gateway; do
   if systemctl list-unit-files --quiet 2>/dev/null | grep -q "^\${svc}\\.service"; then
-    OC_SERVICE="\$svc"
-    break
+    OC_SERVICE="\$svc"; OC_SCOPE="system"; break
+  fi
+  if systemctl --user list-unit-files --quiet 2>/dev/null | grep -q "^\${svc}\\.service"; then
+    OC_SERVICE="\$svc"; OC_SCOPE="user"; break
   fi
 done
-if [[ -n "\$OC_SERVICE" ]]; then
+if [[ "\$OC_SCOPE" == "system" ]]; then
   systemctl restart "\$OC_SERVICE"
+elif [[ "\$OC_SCOPE" == "user" ]]; then
+  systemctl --user restart "\$OC_SERVICE"
 else
   openclaw restart 2>/dev/null || echo "warning: could not restart OC daemon; run 'openclaw restart' manually" >&2
 fi
