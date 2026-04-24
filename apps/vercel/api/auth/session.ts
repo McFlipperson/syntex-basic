@@ -30,6 +30,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
           tunnelHostname: vps.tunnel_hostname,
           registered: vps.registered_at !== null,
           currentModel: vps.current_model,
+          installUrl: vps.registered_at === null ? `/api/install/${vps.install_token}` : null,
         }
       : null,
   });

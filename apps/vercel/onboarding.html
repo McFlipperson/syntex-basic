@@ -480,14 +480,25 @@ function toggleAck(checked) {
 }
 
 // ── STEP 4: SHOW INSTALL COMMAND ───────────────────
-function initStep4() {
+async function initStep4() {
   const cmdEl  = document.getElementById('install-cmd');
   const errEl  = document.getElementById('script-error');
   errEl.className   = 'msg error';
   document.getElementById('run-btn').style.display    = 'block';
   document.getElementById('connecting-wrap').className = 'connecting-wrap';
 
-  const installUrl = localStorage.getItem('syntex_install_url');
+  let installUrl = localStorage.getItem('syntex_install_url');
+  if (!installUrl) {
+    try {
+      const res  = await fetch('/api/auth/session', { credentials: 'include' });
+      const data = await res.json();
+      if (data.vps && data.vps.installUrl) {
+        installUrl = data.vps.installUrl;
+        localStorage.setItem('syntex_install_url', installUrl);
+      }
+    } catch (e) { /* fall through to error */ }
+  }
+
   if (!installUrl) {
     cmdEl.textContent = 'Install URL not found. Please restart the setup or contact support.';
     cmdEl.className   = 'code-block error-state';
