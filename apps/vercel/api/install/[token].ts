@@ -96,10 +96,20 @@ if ! command -v node >/dev/null 2>&1; then
   apt-get install -y nodejs
 fi
 
-# --- OpenClaw ---
-npm install -g openclaw >/dev/null
+# --- OpenClaw (official installer, not npm — npm lacks systemd scaffolding) ---
+if ! command -v openclaw >/dev/null 2>&1; then
+  curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --no-onboard
+fi
 
-# --- Run OC's onboard — it writes openclaw.json AND installs the systemd unit ---
+# The official installer may place the binary in a user bin dir not on PATH
+for candidate in /root/.local/bin /root/.openclaw/bin /usr/local/bin; do
+  if [[ -x "\$candidate/openclaw" && ":\$PATH:" != *":\$candidate:"* ]]; then
+    export PATH="\$candidate:\$PATH"
+  fi
+done
+command -v openclaw >/dev/null 2>&1 || { echo "openclaw not found after install" >&2; exit 1; }
+
+# --- Run OC's onboard — writes config AND installs its own systemd daemon ---
 openclaw onboard --non-interactive --accept-risk \\
   --mode local \\
   --auth-choice custom-api-key \\
@@ -112,6 +122,9 @@ openclaw onboard --non-interactive --accept-risk \\
   --gateway-bind loopback \\
   --gateway-auth token \\
   --gateway-token "\${SYNTEX_GATEWAY_TOKEN}" \\
+  --install-daemon \\
+  --daemon-runtime node \\
+  --skip-skills \\
   --skip-health
 
 # --- Patch CORS allowlist into onboard-generated config ---
@@ -125,8 +138,20 @@ jq --arg origin "\${SYNTEX_ALLOWED_ORIGIN}" '
   | .gateway.controlUi.allowedOrigins = [$origin]
 ' "\$CFG" > "\$tmp" && mv "\$tmp" "\$CFG"
 
-# Restart the onboard-managed service to pick up the patched config
-systemctl restart openclaw-gateway.service || systemctl start openclaw-gateway.service
+# Restart the onboard-managed service to pick up the patched config.
+# Service name varies by OC version — detect it.
+OC_SERVICE=""
+for svc in openclaw openclaw-daemon openclaw-gateway oc-daemon oc-gateway; do
+  if systemctl list-unit-files --quiet 2>/dev/null | grep -q "^\${svc}\\.service"; then
+    OC_SERVICE="\$svc"
+    break
+  fi
+done
+if [[ -n "\$OC_SERVICE" ]]; then
+  systemctl restart "\$OC_SERVICE"
+else
+  openclaw restart 2>/dev/null || echo "warning: could not restart OC daemon; run 'openclaw restart' manually" >&2
+fi
 
 # --- cloudflared tunnel (token baked in at signup) ---
 TUNNEL_TOKEN_URL="\${SYNTEX_API_ORIGIN}/api/install-tunnel-token/\${SYNTEX_INSTALL_TOKEN}"
