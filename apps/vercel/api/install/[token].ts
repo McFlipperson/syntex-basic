@@ -140,30 +140,44 @@ jq --arg origin "\${SYNTEX_ALLOWED_ORIGIN}" '
   | .gateway.controlUi.allowedOrigins = [$origin]
 ' "\$CFG" > "\$tmp" && mv "\$tmp" "\$CFG"
 
-# --- Write our own system-level systemd unit for the OC gateway.
-# Distinct name ("syntex-oc") so OC's internal "am I the daemon?" probe
-# doesn't see a matching unit and loop.
-cat > /etc/systemd/system/syntex-oc.service <<UNIT
+# --- Kill any stale gateway process holding the port lock.
+# The OC supervisor logs "already running under systemd; waiting 5000ms..."
+# when GatewayLockError fires — i.e. when another openclaw process already
+# holds the port. Clean that up before we enable the service.
+pkill -f "openclaw gateway" 2>/dev/null || true
+sleep 1
+
+# --- Write our own system-level systemd unit (OC's installer only writes
+# user-scope units, which need a DBus session unavailable under curl|sudo bash).
+# ExecStart / options mirror OC's own generated template (systemd-BX-yyEb4.js).
+cat > /etc/systemd/system/openclaw-gateway.service <<UNIT
 [Unit]
-Description=Syntex OpenClaw Gateway
+Description=OpenClaw Gateway
 After=network-online.target
 Wants=network-online.target
+StartLimitBurst=5
+StartLimitIntervalSec=60
 
 [Service]
 Type=simple
 User=root
 Environment=HOME=/root
 Environment=SYNTEX_CREDIT_TOKEN=\${SYNTEX_CREDIT_TOKEN}
-ExecStart=\${OC_BIN} gateway run
+ExecStart=\${OC_BIN} gateway --port 18789
 Restart=always
-RestartSec=3
+RestartSec=5
+RestartPreventExitStatus=78
+TimeoutStopSec=30
+TimeoutStartSec=30
+SuccessExitStatus=0 143
+KillMode=control-group
 
 [Install]
 WantedBy=multi-user.target
 UNIT
 
 systemctl daemon-reload
-systemctl enable --now syntex-oc.service
+systemctl enable --now openclaw-gateway.service
 
 # --- cloudflared tunnel (token baked in at signup) ---
 TUNNEL_TOKEN_URL="\${SYNTEX_API_ORIGIN}/api/install-tunnel-token/\${SYNTEX_INSTALL_TOKEN}"
