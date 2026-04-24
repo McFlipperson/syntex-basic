@@ -22,5 +22,5 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   }
 
   res.setHeader("Set-Cookie", makeSessionCookie(user.id));
-  json(res, 200, { userId: user.id });
+  json(res, 200, { userId: user.id, syntexToken: user.api_token });
 }

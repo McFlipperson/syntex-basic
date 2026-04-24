@@ -174,10 +174,31 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 
 <div class="cursor" id="cursor"></div>
 
+<!-- ── AUTH MODAL ─────────────────────────────────── -->
+<div id="auth-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#0a0a0a;border:1px solid #2a2a2a;width:100%;max-width:420px;margin:20px;font-family:'IBM Plex Mono',monospace;">
+
+    <!-- Tabs -->
+    <div style="display:flex;border-bottom:1px solid #2a2a2a;">
+      <button id="tab-signup" onclick="switchTab('signup')" style="flex:1;padding:16px;background:none;border:none;border-bottom:2px solid #B8FF00;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#B8FF00;cursor:pointer;">Create Account</button>
+      <button id="tab-login" onclick="switchTab('login')" style="flex:1;padding:16px;background:none;border:none;border-bottom:2px solid transparent;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#888;cursor:pointer;">Sign In</button>
+    </div>
+
+    <div style="padding:32px;">
+      <div id="auth-title" style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:#fff;margin-bottom:4px;">CREATE ACCOUNT</div>
+      <div id="auth-sub" style="font-size:11px;color:#888;letter-spacing:0.06em;margin-bottom:24px;">You'll use this to access your agent from anywhere.</div>
+      <input id="auth-email" type="email" placeholder="email" style="width:100%;padding:10px 12px;background:#1a1a1a;border:1px solid #2a2a2a;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#fff;outline:none;margin-bottom:10px;box-sizing:border-box;">
+      <input id="auth-password" type="password" placeholder="password" style="width:100%;padding:10px 12px;background:#1a1a1a;border:1px solid #2a2a2a;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#fff;outline:none;margin-bottom:10px;box-sizing:border-box;">
+      <div id="auth-err" style="color:#EF4444;font-size:10px;letter-spacing:0.04em;min-height:16px;margin-bottom:12px;"></div>
+      <button id="auth-submit" onclick="doAuth()" style="width:100%;padding:12px;background:#B8FF00;color:#000;border:none;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;">Create Account</button>
+    </div>
+  </div>
+</div>
+
 <!-- NAV -->
 <nav>
   <a href="/" class="nav-logo">SYNTE<span>X</span></a>
-  <span class="nav-test" id="nav-test-label" style="display:none;">TEST MODE</span>
+  <span class="nav-test" id="nav-test-label" style="display:none;"></span>
   <div class="nav-step-track" id="stepTrack">
     <div class="nav-step active" id="track-1"></div>
     <div class="nav-step" id="track-2"></div>
@@ -600,47 +621,117 @@ function showMsg(id, text, type) {
   el.className   = 'msg ' + type + ' show';
 }
 
-function redirectToLogin() {
-  window.location.href = '/onboarding.html?login=1';
+// ── AUTH MODAL ─────────────────────────────────────
+let authMode = 'signup';
+
+function showAuthModal() {
+  document.getElementById('auth-overlay').style.display = 'flex';
+  document.getElementById('auth-email').focus();
 }
 
-// ── TEST MODE BYPASS ───────────────────────────────
-async function testGuestSignup() {
-  const email = 'guest_' + Date.now() + '@test.syntex';
+function hideAuthModal() {
+  document.getElementById('auth-overlay').style.display = 'none';
+  document.getElementById('auth-err').textContent = '';
+}
+
+function switchTab(mode) {
+  authMode = mode;
+  const isSignup = mode === 'signup';
+  document.getElementById('auth-title').textContent   = isSignup ? 'CREATE ACCOUNT' : 'WELCOME BACK';
+  document.getElementById('auth-sub').textContent     = isSignup ? "You'll use this to access your agent from anywhere." : 'Sign in to continue.';
+  document.getElementById('auth-submit').textContent  = isSignup ? 'Create Account' : 'Sign In';
+  document.getElementById('auth-password').placeholder = isSignup ? 'password (8+ chars)' : 'password';
+  document.getElementById('tab-signup').style.borderBottomColor = isSignup ? '#B8FF00' : 'transparent';
+  document.getElementById('tab-signup').style.color             = isSignup ? '#B8FF00' : '#888';
+  document.getElementById('tab-login').style.borderBottomColor  = isSignup ? 'transparent' : '#B8FF00';
+  document.getElementById('tab-login').style.color              = isSignup ? '#888' : '#B8FF00';
+  document.getElementById('auth-err').textContent = '';
+}
+
+async function afterAuth() {
+  // Check session — if VPS registered go straight to chat
   try {
-    const res  = await fetch('/api/auth/signup', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ email, password: 'test123', username: 'Guest' })
-    });
+    const res  = await fetch('/api/auth/session', { credentials: 'include' });
     const data = await res.json();
-    if (!res.ok) return;
-    state.token = data.syntexToken;
-    localStorage.setItem('syntex_token', state.token);
-    if (data.installUrl) localStorage.setItem('syntex_install_url', data.installUrl);
+    if (data.vps && data.vps.registered) {
+      window.location.href = '/chat.html';
+      return;
+    }
+  } catch (e) { /* ignore, fall through */ }
+  hideAuthModal();
+  goToStep(1);
+}
+
+async function doAuth() {
+  const email    = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const errEl    = document.getElementById('auth-err');
+  const btn      = document.getElementById('auth-submit');
+  errEl.textContent = '';
+  btn.disabled = true;
+  btn.textContent  = authMode === 'signup' ? 'Creating…' : 'Signing in…';
+
+  try {
+    if (authMode === 'signup') {
+      const res  = await fetch('/api/auth/signup', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) { errEl.textContent = data.error ?? 'Signup failed.'; return; }
+      state.token = data.syntexToken;
+      localStorage.setItem('syntex_token', state.token);
+      if (data.installUrl) localStorage.setItem('syntex_install_url', data.installUrl);
+      hideAuthModal();
+      goToStep(2); // new user → start onboarding
+    } else {
+      const res  = await fetch('/api/auth/login', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) { errEl.textContent = data.error ?? 'Login failed.'; return; }
+      state.token = data.syntexToken ?? null;
+      if (state.token) localStorage.setItem('syntex_token', state.token);
+      await afterAuth(); // existing user → check VPS status
+    }
   } catch (err) {
-    // Non-fatal in test mode
+    errEl.textContent = 'Network error. Check your connection.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = authMode === 'signup' ? 'Create Account' : 'Sign In';
   }
 }
 
+document.getElementById('auth-password').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') doAuth();
+});
+
 // ── INIT ───────────────────────────────────────────
 (async function init() {
-  // If no token, auto-create guest account (TEST MODE)
   if (!state.token) {
-    document.getElementById('nav-test-label').style.display = 'inline';
-    await testGuestSignup();
-    // If still no token after bypass attempt, redirect
-    if (!state.token) {
-      redirectToLogin();
-      return;
-    }
+    showAuthModal();
+    return;
   }
 
   // Handle Stripe return to step 5
   const params = new URLSearchParams(window.location.search);
   if (params.get('deposit') === 'success') {
     goToStep(5);
+    return;
   }
+
+  // Check if already fully set up → go straight to chat
+  try {
+    const res  = await fetch('/api/auth/session', { credentials: 'include' });
+    const data = await res.json();
+    if (data.vps && data.vps.registered) {
+      window.location.href = '/chat.html';
+      return;
+    }
+  } catch (e) { /* ignore */ }
 })();
 </script>
 </body>
