@@ -16,6 +16,21 @@ function sse(res: ServerResponse, data: unknown): void {
 }
 
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
+  try {
+    return await run(req, res);
+  } catch (err) {
+    console.error("[chat/send] preflight failure", err);
+    if (!res.headersSent) {
+      res.statusCode = 500;
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify({ error: "PREFLIGHT_FAILED", message: String(err) }));
+    } else {
+      try { res.end(); } catch {}
+    }
+  }
+}
+
+async function run(req: IncomingMessage, res: ServerResponse) {
   if (applyCors(req, res)) return;
   if (req.method !== "POST") {
     res.statusCode = 405;
