@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vercel dev",
-    "build": "tsc --noEmit",
+    "build": "pnpm --filter @syntex/protocol build && tsc --noEmit",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
