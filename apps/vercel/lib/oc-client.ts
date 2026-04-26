@@ -74,10 +74,6 @@ export class OcClient {
     } catch {
       return;
     }
-    if (frame.type === "hello-ok") {
-      this.helloResolved = true;
-      return;
-    }
     if (frame.type === "res") {
       const resolver = this.pending.get(frame.id);
       if (resolver) {
@@ -106,18 +102,31 @@ export class OcClient {
       scopes: ["operator.read", "operator.write"],
       auth: { token: this.config.token },
     };
-    const frame: RequestFrame<"connect", ConnectParams> = {
-      type: "req",
-      id: randomUUID(),
-      method: "connect",
-      params,
-    };
-    this.send(frame);
-    const deadline = Date.now() + 10_000;
-    while (!this.helloResolved) {
-      if (Date.now() > deadline) throw new Error("HELLO_TIMEOUT");
-      await new Promise((r) => setTimeout(r, 25));
+    // OC server returns hello-ok as `{ type: "res", id, ok: true, payload: { type: "hello-ok", ... } }`
+    // (server.impl-D40kmTX8.js:11614,11691). Use the same request/response correlation as other RPCs.
+    const id = randomUUID();
+    const frame: RequestFrame<"connect", ConnectParams> = { type: "req", id, method: "connect", params };
+    const res = await new Promise<ResponseFrame>((resolve, reject) => {
+      const t = setTimeout(() => {
+        this.pending.delete(id);
+        reject(new Error("HELLO_TIMEOUT"));
+      }, 10_000);
+      this.pending.set(id, (frame) => {
+        clearTimeout(t);
+        resolve(frame);
+      });
+      try {
+        this.send(frame);
+      } catch (err) {
+        clearTimeout(t);
+        this.pending.delete(id);
+        reject(err);
+      }
+    });
+    if (!res.ok) {
+      throw new Error(`OC_CONNECT_REJECTED:${JSON.stringify(res.error)}`);
     }
+    this.helloResolved = true;
   }
 
   private send(frame: AnyFrame): void {
