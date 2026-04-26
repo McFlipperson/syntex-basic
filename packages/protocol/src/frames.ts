@@ -50,7 +50,7 @@ export interface ConnectChallengePayload {
 
 export type ConnectChallengeEvent = EventFrame<"connect.challenge", ConnectChallengePayload>;
 
-export type GatewayClientMode = "webchat" | "operator" | "node" | "cli" | "desktop";
+export type GatewayClientMode = "webchat" | "cli" | "ui" | "backend" | "node" | "probe" | "test";
 
 export type GatewayRole = "operator" | "node";
 

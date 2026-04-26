@@ -92,11 +92,15 @@ export class OcClient {
     const params: ConnectParams = {
       minProtocol: PROTOCOL_VERSION,
       maxProtocol: PROTOCOL_VERSION,
+      // client.id and client.mode are enum-validated by OC
+      // (message-channel-Bk_YHfQg.js:6-29). gateway-client + backend is
+      // the right combo for an external operator integration.
       client: {
-        id: this.config.clientId,
+        id: "gateway-client",
+        displayName: this.config.clientId,
         version: "1.0.0",
         platform: "vercel",
-        mode: "operator",
+        mode: "backend",
       },
       role: "operator",
       scopes: ["operator.read", "operator.write"],
