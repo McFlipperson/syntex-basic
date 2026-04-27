@@ -252,10 +252,12 @@ async function sendMessage(text: string): Promise<void> {
     await new Promise<void>((resolve) => {
       let bufferedText = "";
       let replaced = false;
+      let liveMsg: ChatMsg = pending;
       const swap = (msg: ChatMsg) => {
-        const idx = state.messages.indexOf(pending);
+        const idx = state.messages.indexOf(liveMsg);
         if (idx >= 0) state.messages.splice(idx, 1, msg);
         else state.messages.push(msg);
+        liveMsg = msg;
         replaced = true;
       };
       const cleanup = readStream(stream, {
