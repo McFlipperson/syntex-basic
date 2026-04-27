@@ -43,30 +43,30 @@ export const CSS = `
   .header {
     display: flex;
     align-items: center;
-    padding: 12px 16px;
+    padding: 0 16px;
     border-bottom: 1px solid #2a2a2a;
     flex-shrink: 0;
-    gap: 10px;
+    gap: 12px;
     background: #000;
-    min-height: 48px;
+    height: 52px;
   }
-  .header > div {
+  .header-logo {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 2px;
-    color: #B8FF00;
-    flex: 1;
+    font-size: 26px;
+    letter-spacing: 0.05em;
+    color: #fff;
     line-height: 1;
     font-weight: normal;
+    flex-shrink: 0;
   }
+  .header-logo span { color: #B8FF00; }
+  .header-spacer { flex: 1; }
   .header select {
-    flex: 1;
-    max-width: 320px;
     font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    padding: 7px 28px 7px 10px;
+    padding: 6px 26px 6px 10px;
     background: #1a1a1a;
     border: 1px solid #2a2a2a;
     border-radius: 2px;
@@ -78,10 +78,35 @@ export const CSS = `
     -webkit-appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23888'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 10px center;
+    background-position: right 9px center;
+    max-width: 220px;
   }
+  @media (max-width: 480px) { .header select { max-width: 150px; } }
   .header select:focus { border-color: #444; color: #fff; }
   .header select option { background: #1a1a1a; color: #fff; }
+  .header-credits {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: #444;
+    flex-shrink: 0;
+  }
+  @media (max-width: 480px) { .header-credits { display: none; } }
+  .btn-logout {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #444;
+    background: none;
+    border: 1px solid #2a2a2a;
+    border-radius: 2px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+  }
+  .btn-logout:hover { color: #fff; border-color: #444; }
 
   /* ── STATUS LINE ─────────────────────────────────── */
   .status-line {

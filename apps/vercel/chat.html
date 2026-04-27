@@ -3,137 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#B8FF00">
+<meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Syntex">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <link rel="manifest" href="/manifest.json">
-<title>SYNTEX — Chat</title>
+<title>SYNTEX</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-:root{
-  --black:#080808;--white:#f0f0f0;--lime:#B8FF00;
-  --gray:#1a1a1a;--gray2:#2a2a2a;--gray3:#444;--muted:#888;
-  --nav-h:61px;
-  --bebas:'Bebas Neue',sans-serif;
-  --mono:'IBM Plex Mono',monospace;
-}
-html,body{height:100%;overflow:hidden;}
-body{background:var(--black);color:var(--white);font-family:var(--mono);cursor:none;}
-body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:998;opacity:0.6;}
-
-/* ── CURSOR ──────────────────────────────────────── */
-.cursor{position:fixed;width:12px;height:12px;background:var(--lime);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform 0.1s;}
-.cursor.big{transform:translate(-50%,-50%) scale(4);background:transparent;border:1px solid var(--lime);}
-
-/* ── NAV ─────────────────────────────────────────── */
-nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 32px;border-bottom:1px solid var(--gray2);background:var(--black);height:var(--nav-h);}
-.nav-logo{font-family:var(--bebas);font-size:28px;letter-spacing:0.05em;color:var(--white);text-decoration:none;}
-.nav-logo span{color:var(--lime);}
-.nav-right{display:flex;align-items:center;gap:16px;}
-.nav-status{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px;}
-.nav-status-dot{width:7px;height:7px;background:var(--lime);flex-shrink:0;animation:pulse 2s ease-in-out infinite;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
-.btn-logout{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);background:none;border:1px solid var(--gray3);padding:7px 14px;cursor:none;transition:all 0.15s;text-decoration:none;}
-.btn-logout:hover{color:var(--white);border-color:var(--muted);}
-
-/* ── DEPOSIT BANNER ──────────────────────────────── */
-#deposit-banner{position:fixed;top:var(--nav-h);left:0;right:0;z-index:99;background:rgba(184,255,0,0.08);border-bottom:1px solid rgba(184,255,0,0.3);color:var(--lime);font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-align:center;padding:10px 16px;display:none;}
-#deposit-banner.visible{display:block;}
-#deposit-banner button{background:none;border:none;color:var(--lime);opacity:0.6;font-size:14px;line-height:1;cursor:none;margin-left:12px;vertical-align:middle;}
-#deposit-banner button:hover{opacity:1;}
-
-/* ── WIDGET CONTAINER ────────────────────────────── */
-#widget-root{position:fixed;top:var(--nav-h);left:0;right:0;bottom:0;z-index:10;display:flex;flex-direction:column;overflow:hidden;}
-#widget-root.banner-open{top:calc(var(--nav-h) + 41px);}
-/* widget host must fill the container */
-#widget-root>*{flex:1;min-height:0;}
-
-/* ── MOBILE ──────────────────────────────────────── */
-@media(max-width:768px){
-  nav{padding:14px 20px;}
-  .nav-status{display:none;}
-}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;}
 </style>
 </head>
 <body>
-
-<div class="cursor" id="cursor"></div>
-
-<!-- NAV -->
-<nav>
-  <a href="/chat.html" class="nav-logo">SYNTE<span>X</span></a>
-  <div class="nav-right">
-    <span class="nav-status">
-      <span class="nav-status-dot"></span>
-      Agent online
-    </span>
-    <a href="/onboarding.html" class="btn-logout" id="logout-btn">Log out</a>
-  </div>
-</nav>
-
-<!-- DEPOSIT SUCCESS BANNER -->
-<div id="deposit-banner">
-  Credits added successfully.
-  <button aria-label="Dismiss" id="dismiss-banner">×</button>
-</div>
-
-<!-- WIDGET MOUNT POINT -->
-<div id="widget-root"></div>
-
+<div id="app"></div>
 <script>
-// ── CURSOR ─────────────────────────────────────────
-const cursor = document.getElementById('cursor');
-document.addEventListener('mousemove', e => {
-  cursor.style.left = e.clientX + 'px';
-  cursor.style.top  = e.clientY + 'px';
-});
-document.addEventListener('mouseenter', () => cursor.style.opacity = '1');
-document.addEventListener('mouseleave', () => cursor.style.opacity = '0');
-document.querySelectorAll('a,button').forEach(el => {
-  el.addEventListener('mouseenter', () => cursor.classList.add('big'));
-  el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
-});
-
-// ── DEPOSIT SUCCESS BANNER ─────────────────────────
-(function handleDepositParam() {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('deposit') === 'success') {
-    const banner     = document.getElementById('deposit-banner');
-    const widgetRoot = document.getElementById('widget-root');
-    banner.classList.add('visible');
-    widgetRoot.classList.add('banner-open');
-    history.replaceState(null, '', window.location.pathname);
-    document.getElementById('dismiss-banner').addEventListener('click', () => {
-      banner.classList.remove('visible');
-      widgetRoot.classList.remove('banner-open');
-    });
-  }
-})();
-
-// ── LOGOUT ─────────────────────────────────────────
-document.getElementById('logout-btn').addEventListener('click', e => {
-  e.preventDefault();
-  localStorage.removeItem('syntex_token');
-  localStorage.removeItem('syntex_install_url');
-  window.location.href = '/onboarding.html';
-});
-
-// ── SYNTEX WIDGET ──────────────────────────────────
 window.SYNTEX_CONFIG = {
   apiOrigin: '',
-  mountEl:   document.getElementById('widget-root'),
-  token:     localStorage.getItem('syntex_token') || undefined
+  mountEl: document.getElementById('app'),
 };
-
-const script = document.createElement('script');
-script.src = '/syntex-widget.js';
-document.head.appendChild(script);
-
-// ── SERVICE WORKER ─────────────────────────────────
+</script>
+<script src="/syntex-widget.js"></script>
+<script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(() => {});

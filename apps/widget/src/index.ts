@@ -55,20 +55,20 @@ function render(): void {
   const panel = el("div", { class: "panel", role: "main" });
 
   if (!state.session) {
-    panel.appendChild(renderHeader("Loading…"));
+    panel.appendChild(renderHeader());
     panel.appendChild(el("div", { class: "messages" }, "One moment…"));
     root.appendChild(panel);
     return;
   }
 
   if (!state.session.authenticated) {
-    panel.appendChild(renderHeader("Syntex"));
+    panel.appendChild(renderHeader());
     panel.appendChild(renderAuth());
     root.appendChild(panel);
     return;
   }
 
-  panel.appendChild(renderHeader("Syntex", true));
+  panel.appendChild(renderHeader(true));
 
   if (!state.session.vps) {
     panel.appendChild(renderStatus("VPS not provisioned — contact support.", true));
@@ -86,9 +86,16 @@ function render(): void {
   root.appendChild(panel);
 }
 
-function renderHeader(title: string, showModelPicker = false): HTMLElement {
+function renderHeader(authenticated = false): HTMLElement {
   const header = el("div", { class: "header" });
-  if (showModelPicker) {
+
+  const logo = el("div", { class: "header-logo" });
+  logo.innerHTML = "SYNTE<span>X</span>";
+  header.appendChild(logo);
+
+  header.appendChild(el("div", { class: "header-spacer" }));
+
+  if (authenticated) {
     const select = el("select", { "aria-label": "Model" }) as HTMLSelectElement;
     for (const m of MODEL_OPTIONS) {
       const opt = el("option", { value: m.id }, m.label) as HTMLOptionElement;
@@ -99,9 +106,22 @@ function renderHeader(title: string, showModelPicker = false): HTMLElement {
       state.currentModel = select.value;
     });
     header.appendChild(select);
-  } else {
-    header.appendChild(el("div", { style: "flex:1;font-weight:600;" }, title));
+
+    const credits = state.session?.credits_cents ?? 0;
+    header.appendChild(
+      el("div", { class: "header-credits" }, `$${(credits / 100).toFixed(2)}`),
+    );
+
+    const logoutBtn = el("button", { class: "btn-logout" }, "Log out");
+    logoutBtn.addEventListener("click", async () => {
+      await api.logout().catch(() => {});
+      state.session = { authenticated: false };
+      state.messages = [];
+      render();
+    });
+    header.appendChild(logoutBtn);
   }
+
   return header;
 }
 
