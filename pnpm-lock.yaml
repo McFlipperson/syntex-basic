@@ -17,9 +17,6 @@ importers:
       '@neondatabase/serverless':
         specifier: ^0.10.1
         version: 0.10.4
-      '@syntex/protocol':
-        specifier: workspace:*
-        version: link:../../packages/protocol
       stripe:
         specifier: ^16.0.0
         version: 16.12.0
@@ -27,6 +24,9 @@ importers:
         specifier: ^8.18.0
         version: 8.20.0
     devDependencies:
+      '@syntex/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
       '@types/node':
         specifier: ^20.16.11
         version: 20.19.39
