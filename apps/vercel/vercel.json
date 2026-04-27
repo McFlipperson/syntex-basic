@@ -3,13 +3,13 @@
   "outputDirectory": ".",
   "functions": {
     "api/sse/stream.ts": {
-      "maxDuration": 300
+      "maxDuration": 60
     },
     "api/chat/send.ts": {
-      "maxDuration": 300
+      "maxDuration": 60
     },
     "api/v1/chat/completions.ts": {
-      "maxDuration": 300
+      "maxDuration": 60
     }
   },
   "routes": [
