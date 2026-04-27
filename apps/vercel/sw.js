@@ -1,32 +1,20 @@
-const CACHE_NAME = 'syntex-v1';
-const CACHED_URLS = [
-  '/chat.html',
-  '/syntex-widget.js',
-  '/manifest.json'
-];
+const CACHE_NAME = 'syntex-v2';
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(CACHED_URLS))
+    caches.open(CACHE_NAME).then(cache => cache.addAll(['/manifest.json']))
   );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(self.clients.claim());
-});
-
-self.addEventListener('fetch', event => {
-  if (!CACHED_URLS.includes(new URL(event.request.url).pathname)) return;
-
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-        return response;
-      });
-    })
+  // Delete all old caches
+  event.waitUntil(
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
 });
+
+// No fetch interception — let the browser and Vercel CDN handle caching.
+// The SW is here only for PWA install eligibility.
