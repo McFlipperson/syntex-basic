@@ -12,6 +12,8 @@ export interface UserRow {
   api_token: string;
   created_at: string;
   credits_cents: number;
+  or_api_key: string | null;
+  or_key_hash: string | null;
 }
 
 export interface VpsRegistrationRow {
@@ -26,7 +28,7 @@ export interface VpsRegistrationRow {
 
 export async function findUserByEmail(email: string): Promise<UserRow | null> {
   const rows = (await sql`
-    SELECT id, email, password_hash, api_token, created_at, credits_cents
+    SELECT id, email, password_hash, api_token, created_at, credits_cents, or_api_key, or_key_hash
     FROM users WHERE email = ${email}
   `) as UserRow[];
   return rows[0] ?? null;
@@ -34,7 +36,7 @@ export async function findUserByEmail(email: string): Promise<UserRow | null> {
 
 export async function findUserById(id: string): Promise<UserRow | null> {
   const rows = (await sql`
-    SELECT id, email, password_hash, api_token, created_at, credits_cents
+    SELECT id, email, password_hash, api_token, created_at, credits_cents, or_api_key, or_key_hash
     FROM users WHERE id = ${id}
   `) as UserRow[];
   return rows[0] ?? null;
@@ -42,7 +44,7 @@ export async function findUserById(id: string): Promise<UserRow | null> {
 
 export async function getUserByToken(token: string): Promise<UserRow | null> {
   const rows = (await sql`
-    SELECT id, email, password_hash, api_token, created_at, credits_cents
+    SELECT id, email, password_hash, api_token, created_at, credits_cents, or_api_key, or_key_hash
     FROM users WHERE api_token = ${token}
   `) as UserRow[];
   return rows[0] ?? null;
@@ -56,7 +58,7 @@ export async function createUser(
   const rows = (await sql`
     INSERT INTO users (email, password_hash, api_token)
     VALUES (${email}, ${passwordHash}, ${apiToken})
-    RETURNING id, email, password_hash, api_token, created_at, credits_cents
+    RETURNING id, email, password_hash, api_token, created_at, credits_cents, or_api_key, or_key_hash
   `) as UserRow[];
   const row = rows[0];
   if (!row) throw new Error("createUser: insert returned no row");
@@ -104,12 +106,14 @@ export async function upsertVpsRegistration(params: {
   `;
 }
 
-export async function markVpsRegistered(installToken: string): Promise<void> {
-  await sql`
+export async function markVpsRegistered(installToken: string): Promise<boolean> {
+  const rows = (await sql`
     UPDATE vps_registrations
     SET registered_at = NOW()
-    WHERE install_token = ${installToken}
-  `;
+    WHERE install_token = ${installToken} AND registered_at IS NULL
+    RETURNING user_id
+  `) as { user_id: string }[];
+  return rows.length > 0;
 }
 
 export async function setCurrentModel(userId: string, model: string): Promise<void> {
@@ -127,4 +131,22 @@ export async function deductCredits(userId: string, cents: number): Promise<numb
   const row = rows[0];
   if (!row) throw new Error("INSUFFICIENT_CREDITS");
   return row.credits_cents;
+}
+
+export async function addCredits(userId: string, cents: number): Promise<UserRow> {
+  const rows = (await sql`
+    UPDATE users SET credits_cents = credits_cents + ${cents}
+    WHERE id = ${userId}
+    RETURNING id, email, password_hash, api_token, created_at, credits_cents, or_api_key, or_key_hash
+  `) as UserRow[];
+  const row = rows[0];
+  if (!row) throw new Error("USER_NOT_FOUND");
+  return row;
+}
+
+export async function storeOrKey(userId: string, orApiKey: string, orKeyHash: string): Promise<void> {
+  await sql`
+    UPDATE users SET or_api_key = ${orApiKey}, or_key_hash = ${orKeyHash}
+    WHERE id = ${userId}
+  `;
 }

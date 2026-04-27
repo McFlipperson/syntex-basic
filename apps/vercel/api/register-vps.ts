@@ -32,6 +32,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     }
   }
 
+  // Atomic: only marks registered if not already registered; safe against replay
   await markVpsRegistered(token);
   json(res, 200, { ok: true });
 }

@@ -8,8 +8,14 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash TEXT NOT NULL,
   api_token TEXT UNIQUE NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  credits_cents INTEGER NOT NULL DEFAULT 0
+  credits_cents INTEGER NOT NULL DEFAULT 0,
+  or_api_key TEXT,
+  or_key_hash TEXT
 );
+
+-- Migration (run if table already exists):
+-- ALTER TABLE users ADD COLUMN IF NOT EXISTS or_api_key TEXT;
+-- ALTER TABLE users ADD COLUMN IF NOT EXISTS or_key_hash TEXT;
 
 CREATE TABLE IF NOT EXISTS vps_registrations (
   user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,

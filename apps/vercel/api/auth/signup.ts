@@ -1,9 +1,10 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { randomBytes } from "node:crypto";
 import { applyCors, json, readJsonBody } from "../../lib/http.js";
-import { createUser, findUserByEmail, upsertVpsRegistration } from "../../lib/db.js";
+import { createUser, findUserByEmail, upsertVpsRegistration, storeOrKey } from "../../lib/db.js";
 import { generateApiToken, hashPassword, makeSessionCookie } from "../../lib/auth.js";
 import { createTunnelForUser } from "../../lib/cloudflare.js";
+import { createOrKey } from "../../lib/openrouter-mgmt.js";
 
 interface Body {
   email?: string;
@@ -29,6 +30,14 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   if (existing) return json(res, 409, { error: "EMAIL_TAKEN" });
 
   const user = await createUser(email, hashPassword(password), generateApiToken());
+
+  // Provision per-user OpenRouter key — non-fatal if OR is down at signup time
+  try {
+    const orKey = await createOrKey(user.id);
+    await storeOrKey(user.id, orKey.key, orKey.hash);
+  } catch (err) {
+    console.error("[signup] OR key provisioning failed for user", user.id, String(err));
+  }
 
   const tunnel = await createTunnelForUser({ userId: user.id });
   const gatewayToken = randomBytes(32).toString("hex");

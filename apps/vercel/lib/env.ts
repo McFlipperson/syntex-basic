@@ -32,4 +32,10 @@ export const env = {
   get STRIPE_SECRET_KEY() {
     return req("STRIPE_SECRET_KEY");
   },
+  get STRIPE_WEBHOOK_SECRET() {
+    return req("STRIPE_WEBHOOK_SECRET");
+  },
+  get OPENROUTER_MANAGEMENT_KEY() {
+    return req("OPENROUTER_MANAGEMENT_KEY");
+  },
 };
