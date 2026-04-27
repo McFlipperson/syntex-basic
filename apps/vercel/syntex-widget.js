@@ -1,9 +1,13 @@
-(function(){"use strict";const P="anthropic/claude-sonnet-4.6",v=[{id:"anthropic/claude-sonnet-4.6",label:"Claude Sonnet 4.6"},{id:"anthropic/claude-opus-4.7",label:"Claude Opus 4.7"},{id:"anthropic/claude-haiku-4.5",label:"Claude Haiku 4.5"},{id:"openai/gpt-5.5",label:"GPT-5.5"},{id:"openai/gpt-5.4-mini",label:"GPT-5.4 Mini"},{id:"openai/gpt-5.4-nano",label:"GPT-5.4 Nano"},{id:"openai/o3",label:"o3"},{id:"openai/o4-mini",label:"o4-mini"},{id:"google/gemini-3.1-pro-preview",label:"Gemini 3.1 Pro"},{id:"google/gemini-3.1-flash-lite-preview",label:"Gemini 3.1 Flash"},{id:"deepseek/deepseek-v4-pro",label:"DeepSeek V4 Pro"},{id:"deepseek/deepseek-v4-flash",label:"DeepSeek V4 Flash"},{id:"meta-llama/llama-4-maverick",label:"Llama 4 Maverick"},{id:"meta-llama/llama-4-scout",label:"Llama 4 Scout"},{id:"mistralai/mistral-small-2603",label:"Mistral Small"},{id:"x-ai/grok-4.20",label:"Grok 4.20"},{id:"qwen/qwen3.6-plus",label:"Qwen3.6 Plus"}];new Set(v.map(o=>o.id));function T(){return{apiOrigin:(typeof window<"u"?window.SYNTEX_CONFIG:void 0)?.apiOrigin??"https://api.syntexprotocol.com"}}class N{constructor(e){this.config=e}url(e){return`${this.config.apiOrigin}${e}`}async session(){const e=await fetch(this.url("/api/auth/session"),{credentials:"include"});return e.ok?await e.json():{authenticated:!1}}async login(e,n){const a=await fetch(this.url("/api/auth/login"),{method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:e,password:n})});if(!a.ok){const r=await a.json().catch(()=>({}));throw new Error(r.error??`LOGIN_FAILED (HTTP ${a.status})`)}}async signup(e,n){const a=await fetch(this.url("/api/auth/signup"),{method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:e,password:n})});if(!a.ok){const r=await a.json().catch(()=>({}));throw new Error(r.error??`SIGNUP_FAILED (HTTP ${a.status})`)}return await a.json()}async logout(){await fetch(this.url("/api/auth/session"),{method:"DELETE",credentials:"include"})}async streamMessage(e){const n=await fetch(this.url("/api/chat/send"),{method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},body:JSON.stringify(e)});if(!n.ok){const a=await n.json().catch(()=>({}));throw new Error(a.error??`HTTP_${n.status}`)}if(!n.body)throw new Error("NO_STREAM");return n.body}}const A=`
+(function(){"use strict";const I="anthropic/claude-sonnet-4.6",k=[{id:"anthropic/claude-sonnet-4.6",label:"Claude Sonnet 4.6"},{id:"anthropic/claude-opus-4.7",label:"Claude Opus 4.7"},{id:"anthropic/claude-haiku-4.5",label:"Claude Haiku 4.5"},{id:"openai/gpt-5.5",label:"GPT-5.5"},{id:"openai/gpt-5.4-mini",label:"GPT-5.4 Mini"},{id:"openai/gpt-5.4-nano",label:"GPT-5.4 Nano"},{id:"openai/o3",label:"o3"},{id:"openai/o4-mini",label:"o4-mini"},{id:"google/gemini-3.1-pro-preview",label:"Gemini 3.1 Pro"},{id:"google/gemini-3.1-flash-lite-preview",label:"Gemini 3.1 Flash"},{id:"deepseek/deepseek-v4-pro",label:"DeepSeek V4 Pro"},{id:"deepseek/deepseek-v4-flash",label:"DeepSeek V4 Flash"},{id:"meta-llama/llama-4-maverick",label:"Llama 4 Maverick"},{id:"meta-llama/llama-4-scout",label:"Llama 4 Scout"},{id:"mistralai/mistral-small-2603",label:"Mistral Small"},{id:"x-ai/grok-4.20",label:"Grok 4.20"},{id:"qwen/qwen3.6-plus",label:"Qwen3.6 Plus"}];new Set(k.map(e=>e.id));function P(){const e=typeof window<"u"?window.SYNTEX_CONFIG:void 0;return{apiOrigin:e?.apiOrigin??"https://api.syntexprotocol.com",mountEl:e?.mountEl}}class O{constructor(t){this.config=t}url(t){return`${this.config.apiOrigin}${t}`}async session(){const t=await fetch(this.url("/api/auth/session"),{credentials:"include"});return t.ok?await t.json():{authenticated:!1}}async login(t,o){const a=await fetch(this.url("/api/auth/login"),{method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:t,password:o})});if(!a.ok){const r=await a.json().catch(()=>({}));throw new Error(r.error??`LOGIN_FAILED (HTTP ${a.status})`)}}async signup(t,o){const a=await fetch(this.url("/api/auth/signup"),{method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:t,password:o})});if(!a.ok){const r=await a.json().catch(()=>({}));throw new Error(r.error??`SIGNUP_FAILED (HTTP ${a.status})`)}return await a.json()}async logout(){await fetch(this.url("/api/auth/session"),{method:"DELETE",credentials:"include"})}async streamMessage(t){const o=await fetch(this.url("/api/chat/send"),{method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},body:JSON.stringify(t)});if(!o.ok){const a=await o.json().catch(()=>({}));throw new Error(a.error??`HTTP_${o.status}`)}if(!o.body)throw new Error("NO_STREAM");return o.body}}const A=`
   /* ── RESET ───────────────────────────────────────── */
   :host {
     all: initial;
     font-family: 'IBM Plex Mono', monospace;
     color: #fff;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
   }
   *, *::before, *::after {
     box-sizing: border-box;
@@ -23,87 +27,29 @@
   /* ── ANIMATIONS ──────────────────────────────────── */
   @keyframes pulse    { 0%,100%{opacity:1} 50%{opacity:0.3} }
   @keyframes fadeIn   { from{opacity:0} to{opacity:1} }
-  @keyframes slideUp  { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
 
-  /* ── LAUNCHER ────────────────────────────────────── */
-  .launcher {
-    position: fixed;
-    right: 20px;
-    bottom: 20px;
-    width: 52px;
-    height: 52px;
-    border-radius: 2px;
-    background: #000;
-    color: #B8FF00;
-    border: 1px solid #2a2a2a;
-    cursor: pointer;
-    font-size: 0;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.7);
-    z-index: 2147483647;
-    transition: border-color 0.15s, background 0.15s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .launcher::after {
-    content: 'SX';
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px;
-    color: #B8FF00;
-    letter-spacing: 2px;
-    line-height: 1;
-  }
-  .launcher:hover {
-    border-color: #B8FF00;
-    background: #080808;
-  }
-
-  /* ── PANEL ───────────────────────────────────────── */
+  /* ── PANEL (fills host) ──────────────────────────── */
   .panel {
-    position: fixed;
-    right: 20px;
-    bottom: 84px;
-    width: 400px;
-    height: min(620px, calc(100vh - 112px));
-    background: #000;
-    border: 1px solid #2a2a2a;
-    border-radius: 2px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+    flex: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    z-index: 2147483647;
-    animation: slideUp 0.22s ease;
+    background: #000;
     font-family: 'IBM Plex Mono', monospace;
-  }
-  @media (max-width: 480px) {
-    .panel {
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-      border-radius: 0;
-      bottom: 0;
-      right: 0;
-    }
-    .launcher {
-      right: 16px;
-      bottom: 16px;
-    }
+    animation: fadeIn 0.18s ease;
   }
 
   /* ── HEADER ──────────────────────────────────────── */
   .header {
     display: flex;
     align-items: center;
-    padding: 12px 14px;
+    padding: 12px 16px;
     border-bottom: 1px solid #2a2a2a;
     flex-shrink: 0;
     gap: 10px;
     background: #000;
     min-height: 48px;
   }
-  /* Loading title */
   .header > div {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 22px;
@@ -113,9 +59,9 @@
     line-height: 1;
     font-weight: normal;
   }
-  /* Model selector */
   .header select {
     flex: 1;
+    max-width: 320px;
     font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     letter-spacing: 0.1em;
@@ -136,25 +82,10 @@
   }
   .header select:focus { border-color: #444; color: #fff; }
   .header select option { background: #1a1a1a; color: #fff; }
-  /* Close button */
-  .close {
-    background: none;
-    border: none;
-    font-size: 18px;
-    cursor: pointer;
-    color: #444;
-    padding: 4px 7px;
-    line-height: 1;
-    transition: color 0.15s;
-    flex-shrink: 0;
-    font-family: 'IBM Plex Mono', monospace;
-    border-radius: 2px;
-  }
-  .close:hover { color: #fff; }
 
   /* ── STATUS LINE ─────────────────────────────────── */
   .status-line {
-    padding: 9px 14px;
+    padding: 9px 16px;
     font-size: 10px;
     letter-spacing: 0.06em;
     color: #888;
@@ -175,10 +106,15 @@
   .messages {
     flex: 1;
     overflow-y: auto;
-    padding: 16px;
+    padding: 20px 16px;
     display: flex;
     flex-direction: column;
     gap: 14px;
+  }
+  /* Center content on wide screens */
+  @media (min-width: 700px) {
+    .messages { padding: 24px max(16px, calc(50% - 360px)); }
+    .composer  { padding: 10px max(16px, calc(50% - 360px)) 16px; }
   }
   .msg {
     max-width: 82%;
@@ -189,6 +125,9 @@
     white-space: pre-wrap;
     word-wrap: break-word;
     font-family: 'IBM Plex Mono', monospace;
+  }
+  @media (min-width: 700px) {
+    .msg { font-size: 13px; max-width: 72%; }
   }
   .msg.agent {
     align-self: flex-start;
@@ -223,7 +162,7 @@
 
   /* ── COMPOSER ────────────────────────────────────── */
   .composer {
-    padding: 10px 12px 14px;
+    padding: 10px 16px 16px;
     border-top: 1px solid #2a2a2a;
     flex-shrink: 0;
     display: flex;
@@ -231,18 +170,22 @@
     gap: 8px;
     background: #000;
   }
+  /* safe-area padding for iOS home indicator */
+  @supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .composer { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+  }
   .composer textarea {
     flex: 1;
     resize: none;
     background: #1a1a1a;
     border: 1px solid #2a2a2a;
     border-radius: 2px;
-    padding: 8px 10px;
+    padding: 10px 12px;
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
+    font-size: 13px;
     color: #fff;
-    min-height: 36px;
-    max-height: 120px;
+    min-height: 40px;
+    max-height: 140px;
     line-height: 1.6;
     outline: none;
     transition: border-color 0.15s;
@@ -250,8 +193,8 @@
   .composer textarea:focus { border-color: #444; }
   .composer textarea::placeholder { color: #444; }
   .composer button {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     flex-shrink: 0;
     background: #B8FF00;
     color: #000;
@@ -277,30 +220,38 @@
 
   /* ── AUTH ────────────────────────────────────────── */
   .auth {
-    padding: 24px 20px;
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    flex: 1;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
     background: #000;
     overflow-y: auto;
   }
+  .auth-inner {
+    width: 100%;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
   .auth h3 {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 32px;
+    font-size: 36px;
     letter-spacing: 2px;
     color: #fff;
     line-height: 1;
     font-weight: normal;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
   }
   .auth input {
-    padding: 10px 12px;
+    padding: 12px 14px;
     background: #1a1a1a;
     border: 1px solid #2a2a2a;
     border-radius: 2px;
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
+    font-size: 13px;
     color: #fff;
     outline: none;
     transition: border-color 0.15s;
@@ -313,7 +264,7 @@
     color: #000;
     border: none;
     border-radius: 2px;
-    padding: 12px;
+    padding: 13px;
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     font-weight: 700;
@@ -322,7 +273,7 @@
     cursor: pointer;
     transition: background 0.15s;
     width: 100%;
-    margin-top: 2px;
+    margin-top: 4px;
   }
   .auth button[type="submit"]:hover { background: #a0e600; }
   .auth .toggle {
@@ -349,6 +300,6 @@
     min-height: 14px;
     line-height: 1.5;
   }
-`;function O(o,e){const n=o.getReader(),a=new TextDecoder;let r="",s=!1,u="",d="";function k(){const p=u,x=d;if(u="",d="",p==="end")return e.onEnd(),!0;if(x)try{e.onData(JSON.parse(x))}catch{}return!1}async function c(){try{for(;!s;){const{value:p,done:x}=await n.read();if(x)break;r+=a.decode(p,{stream:!0});const I=r.split(`
-`);r=I.pop()??"";for(const h of I)if(h===""){if(k())return}else h.startsWith("data: ")?d=h.slice(6):h.startsWith("event: ")&&(u=h.slice(7))}e.onEnd()}catch(p){s||e.onError(p)}}return c(),()=>{s=!0,n.cancel().catch(()=>{})}}const E=T(),g=new N(E),t={open:!1,session:null,authMode:"login",authError:"",busy:!1,messages:[],currentModel:P,streamCleanup:null,pendingInstallUrl:null},b=document.createElement("div");b.setAttribute("data-syntex-widget","");const M=b.attachShadow({mode:"open"}),C=document.createElement("style");C.textContent=A,M.appendChild(C);const f=document.createElement("div");M.appendChild(f),document.body.appendChild(b);function l(){f.replaceChildren();const o=i("button",{class:"launcher","aria-label":"Open chat"},"💬");if(o.addEventListener("click",()=>{t.open=!t.open,t.open&&!t.session&&m(),l()}),f.appendChild(o),!t.open)return;const e=i("div",{class:"panel",role:"dialog"});if(!t.session){e.appendChild(y("Loading…")),e.appendChild(i("div",{class:"messages"},"One moment…")),f.appendChild(e);return}if(!t.session.authenticated){e.appendChild(y("Syntex")),e.appendChild(B()),f.appendChild(e);return}if(e.appendChild(y("Syntex",!0)),!t.session.vps)e.appendChild(w("VPS not provisioned — contact support."));else if(t.session.vps.registered)(t.session.credits_cents??0)<=0&&e.appendChild(w("Out of credits — top up to continue."));else{const n=t.pendingInstallUrl?`Paste this into your VPS as root:  curl -fsSL ${E.apiOrigin}${t.pendingInstallUrl} | sudo bash`:"Your VPS has not phoned home yet. Finish the install there first.";e.appendChild(w(n))}e.appendChild(L()),e.appendChild(F()),f.appendChild(e)}function y(o,e=!1){const n=i("div",{class:"header"});if(e){const r=i("select",{"aria-label":"Model"});for(const s of v){const u=i("option",{value:s.id},s.label);s.id===t.currentModel&&(u.selected=!0),r.appendChild(u)}r.addEventListener("change",()=>{t.currentModel=r.value}),n.appendChild(r)}else n.appendChild(i("div",{style:"flex:1;font-weight:600;"},o));const a=i("button",{class:"close","aria-label":"Close"},"×");return a.addEventListener("click",()=>{t.open=!1,l()}),n.appendChild(a),n}function w(o,e){return i("div",{class:"status-line warn"},o)}function L(){const o=i("div",{class:"messages"});for(const e of t.messages)o.appendChild(i("div",{class:`msg ${e.role}`},e.text));return queueMicrotask(()=>{o.scrollTop=o.scrollHeight}),o}function F(){const o=i("form",{class:"composer"}),e=i("textarea",{rows:"1",placeholder:"Ask your agent…"});e.addEventListener("keydown",a=>{a.key==="Enter"&&!a.shiftKey&&(a.preventDefault(),o.requestSubmit())});const n=i("button",{type:"submit"},"Send");return t.busy&&(n.disabled=!0),o.appendChild(e),o.appendChild(n),o.addEventListener("submit",async a=>{a.preventDefault();const r=e.value.trim();!r||t.busy||(e.value="",await D(r))}),o}function B(){const o=i("form",{class:"auth"});o.appendChild(i("h3",{},t.authMode==="login"?"Sign in":"Create account"));const e=i("input",{type:"email",placeholder:"email",required:"true",autocomplete:"email"}),n=i("input",{type:"password",placeholder:"password (8+ chars)",required:"true",autocomplete:t.authMode==="login"?"current-password":"new-password"}),a=i("div",{class:"err"},t.authError),r=i("button",{type:"submit"},t.authMode==="login"?"Sign in":"Create account"),s=i("button",{type:"button",class:"toggle"},t.authMode==="login"?"No account? Create one":"Already have an account? Sign in");return s.addEventListener("click",()=>{t.authMode=t.authMode==="login"?"signup":"login",t.authError="",l()}),o.appendChild(e),o.appendChild(n),o.appendChild(a),o.appendChild(r),o.appendChild(s),o.addEventListener("submit",async u=>{u.preventDefault(),t.authError="",t.busy=!0,l();try{if(t.authMode==="login")await g.login(e.value,n.value),await m();else{const d=await g.signup(e.value,n.value);t.pendingInstallUrl=d.installUrl,await m()}}catch(d){t.authError=S(d)}finally{t.busy=!1,l()}}),o}async function m(){try{t.session=await g.session()}catch{t.session={authenticated:!1}}t.session.vps?.currentModel&&(t.currentModel=t.session.vps.currentModel),l()}async function D(o){t.messages.push({role:"user",text:o});const e={role:"pending",text:"Thinking…"};t.messages.push(e),t.busy=!0,l();try{const n=await g.streamMessage({message:o,model:t.currentModel});await new Promise(a=>{let r="",s=!1,u=e;const d=c=>{const p=t.messages.indexOf(u);p>=0?t.messages.splice(p,1,c):t.messages.push(c),u=c,s=!0},k=O(n,{onData:c=>{if(c.event!=="chat"&&c.event!=="chat.side_result")return;const p=z(c.payload.message);c.payload.state==="final"&&p?(d({role:"agent",text:p}),l()):c.payload.state==="delta"&&p?(r+=p,d({role:"pending",text:r}),l()):c.payload.state==="error"&&(d({role:"error",text:c.payload.errorMessage??"Agent error"}),l())},onEnd:()=>{s||(d({role:"error",text:"No response received."}),l()),a()},onError:()=>{s||(d({role:"error",text:"Connection lost."}),l()),a()}});t.streamCleanup=k})}catch(n){const a=t.messages.indexOf(e),r={role:"error",text:S(n)};a>=0?t.messages.splice(a,1,r):t.messages.push(r)}finally{t.busy=!1,t.streamCleanup=null,l()}}function z(o){if(typeof o=="string")return o;if(o&&typeof o=="object"){const e=o;if(typeof e.text=="string")return e.text;if(typeof e.content=="string")return e.content;if(Array.isArray(e.content))return e.content.map(n=>typeof n=="string"?n:n&&typeof n=="object"&&"text"in n?String(n.text??""):"").join("")}return""}function S(o){const e=o instanceof Error?o.message:String(o);switch(e){case"INVALID_CREDENTIALS":return"Wrong email or password.";case"EMAIL_TAKEN":return"An account with that email already exists.";case"WEAK_PASSWORD":return"Password must be at least 8 characters.";case"INVALID_EMAIL":return"That email doesn't look right.";case"NO_VPS_REGISTERED":case"VPS_NOT_ONLINE":return"Finish installing Syntex on your VPS first.";case"INSUFFICIENT_CREDITS":return"Out of credits.";default:return e}}function i(o,e={},n){const a=document.createElement(o);for(const[r,s]of Object.entries(e))r==="class"?a.className=s:a.setAttribute(r,s);return typeof n=="string"?a.textContent=n:n&&a.appendChild(n),a}m(),l()})();
+`;function N(e,t){const o=e.getReader(),a=new TextDecoder;let r="",s=!1,u="",p="";function f(){const d=u,b=p;if(u="",p="",d==="end")return t.onEnd(),!0;if(b)try{t.onData(JSON.parse(b))}catch{}return!1}async function l(){try{for(;!s;){const{value:d,done:b}=await o.read();if(b)break;r+=a.decode(d,{stream:!0});const T=r.split(`
+`);r=T.pop()??"";for(const g of T)if(g===""){if(f())return}else g.startsWith("data: ")?p=g.slice(6):g.startsWith("event: ")&&(u=g.slice(7))}t.onEnd()}catch(d){s||t.onError(d)}}return l(),()=>{s=!0,o.cancel().catch(()=>{})}}const y=P(),m=new O(y),n={session:null,authMode:"login",authError:"",busy:!1,messages:[],currentModel:I,streamCleanup:null,pendingInstallUrl:null},x=document.createElement("div");x.setAttribute("data-syntex-widget",""),x.style.cssText="display:flex;flex-direction:column;width:100%;height:100%;";const M=x.attachShadow({mode:"open"}),S=document.createElement("style");S.textContent=A,M.appendChild(S);const h=document.createElement("div");h.style.cssText="display:contents;",M.appendChild(h),(y.mountEl??document.body).appendChild(x);function c(){h.replaceChildren();const e=i("div",{class:"panel",role:"main"});if(!n.session){e.appendChild(w("Loading…")),e.appendChild(i("div",{class:"messages"},"One moment…")),h.appendChild(e);return}if(!n.session.authenticated){e.appendChild(w("Syntex")),e.appendChild(F()),h.appendChild(e);return}if(e.appendChild(w("Syntex",!0)),!n.session.vps)e.appendChild(E("VPS not provisioned — contact support."));else if(n.session.vps.registered)(n.session.credits_cents??0)<=0&&e.appendChild(E("Out of credits — top up to continue."));else{const t=n.pendingInstallUrl?`Paste this into your VPS as root:  curl -fsSL ${y.apiOrigin}${n.pendingInstallUrl} | sudo bash`:"Your VPS has not phoned home yet. Finish the install there first.";e.appendChild(E(t))}e.appendChild(L()),e.appendChild(D()),h.appendChild(e)}function w(e,t=!1){const o=i("div",{class:"header"});if(t){const a=i("select",{"aria-label":"Model"});for(const r of k){const s=i("option",{value:r.id},r.label);r.id===n.currentModel&&(s.selected=!0),a.appendChild(s)}a.addEventListener("change",()=>{n.currentModel=a.value}),o.appendChild(a)}else o.appendChild(i("div",{style:"flex:1;font-weight:600;"},e));return o}function E(e,t){return i("div",{class:"status-line warn"},e)}function L(){const e=i("div",{class:"messages"});for(const t of n.messages)e.appendChild(i("div",{class:`msg ${t.role}`},t.text));return queueMicrotask(()=>{e.scrollTop=e.scrollHeight}),e}function D(){const e=i("form",{class:"composer"}),t=i("textarea",{rows:"1",placeholder:"Ask your agent…"});t.addEventListener("keydown",a=>{a.key==="Enter"&&!a.shiftKey&&(a.preventDefault(),e.requestSubmit())});const o=i("button",{type:"submit"},"→");return n.busy&&(o.disabled=!0),e.appendChild(t),e.appendChild(o),e.addEventListener("submit",async a=>{a.preventDefault();const r=t.value.trim();!r||n.busy||(t.value="",await B(r))}),e}function F(){const e=i("form",{class:"auth"}),t=i("div",{class:"auth-inner"});t.appendChild(i("h3",{},n.authMode==="login"?"Sign in":"Create account"));const o=i("input",{type:"email",placeholder:"email",required:"true",autocomplete:"email"}),a=i("input",{type:"password",placeholder:"password (8+ chars)",required:"true",autocomplete:n.authMode==="login"?"current-password":"new-password"}),r=i("div",{class:"err"},n.authError),s=i("button",{type:"submit"},n.authMode==="login"?"Sign in":"Create account"),u=i("button",{type:"button",class:"toggle"},n.authMode==="login"?"No account? Create one":"Already have an account? Sign in");return u.addEventListener("click",()=>{n.authMode=n.authMode==="login"?"signup":"login",n.authError="",c()}),t.appendChild(o),t.appendChild(a),t.appendChild(r),t.appendChild(s),t.appendChild(u),e.appendChild(t),e.addEventListener("submit",async p=>{p.preventDefault(),n.authError="",n.busy=!0,c();try{if(n.authMode==="login")await m.login(o.value,a.value),await v();else{const f=await m.signup(o.value,a.value);n.pendingInstallUrl=f.installUrl,await v()}}catch(f){n.authError=C(f)}finally{n.busy=!1,c()}}),e}async function v(){try{n.session=await m.session()}catch{n.session={authenticated:!1}}n.session.vps?.currentModel&&(n.currentModel=n.session.vps.currentModel),c()}async function B(e){n.messages.push({role:"user",text:e});const t={role:"pending",text:"Thinking…"};n.messages.push(t),n.busy=!0,c();try{const o=await m.streamMessage({message:e,model:n.currentModel});await new Promise(a=>{let r="",s=!1,u=t;const p=l=>{const d=n.messages.indexOf(u);d>=0?n.messages.splice(d,1,l):n.messages.push(l),u=l,s=!0},f=N(o,{onData:l=>{if(l.event!=="chat"&&l.event!=="chat.side_result")return;const d=_(l.payload.message);l.payload.state==="final"&&d?(p({role:"agent",text:d}),c()):l.payload.state==="delta"&&d?(r+=d,p({role:"pending",text:r}),c()):l.payload.state==="error"&&(p({role:"error",text:l.payload.errorMessage??"Agent error"}),c())},onEnd:()=>{s||(p({role:"error",text:"No response received."}),c()),a()},onError:()=>{s||(p({role:"error",text:"Connection lost."}),c()),a()}});n.streamCleanup=f})}catch(o){const a=n.messages.indexOf(t),r={role:"error",text:C(o)};a>=0?n.messages.splice(a,1,r):n.messages.push(r)}finally{n.busy=!1,n.streamCleanup=null,c()}}function _(e){if(typeof e=="string")return e;if(e&&typeof e=="object"){const t=e;if(typeof t.text=="string")return t.text;if(typeof t.content=="string")return t.content;if(Array.isArray(t.content))return t.content.map(o=>typeof o=="string"?o:o&&typeof o=="object"&&"text"in o?String(o.text??""):"").join("")}return""}function C(e){const t=e instanceof Error?e.message:String(e);switch(t){case"INVALID_CREDENTIALS":return"Wrong email or password.";case"EMAIL_TAKEN":return"An account with that email already exists.";case"WEAK_PASSWORD":return"Password must be at least 8 characters.";case"INVALID_EMAIL":return"That email doesn't look right.";case"NO_VPS_REGISTERED":case"VPS_NOT_ONLINE":return"Finish installing Syntex on your VPS first.";case"INSUFFICIENT_CREDITS":return"Out of credits.";default:return t}}function i(e,t={},o){const a=document.createElement(e);for(const[r,s]of Object.entries(t))r==="class"?a.className=s:a.setAttribute(r,s);return typeof o=="string"?a.textContent=o:o&&a.appendChild(o),a}v(),c()})();
 //# sourceMappingURL=syntex-widget.js.map

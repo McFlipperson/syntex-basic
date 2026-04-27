@@ -47,8 +47,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 #deposit-banner button:hover{opacity:1;}
 
 /* ── WIDGET CONTAINER ────────────────────────────── */
-#widget-root{position:fixed;top:var(--nav-h);left:0;right:0;bottom:0;z-index:10;display:flex;flex-direction:column;}
+#widget-root{position:fixed;top:var(--nav-h);left:0;right:0;bottom:0;z-index:10;display:flex;flex-direction:column;overflow:hidden;}
 #widget-root.banner-open{top:calc(var(--nav-h) + 41px);}
+/* widget host must fill the container */
+#widget-root>*{flex:1;min-height:0;}
 
 /* ── MOBILE ──────────────────────────────────────── */
 @media(max-width:768px){

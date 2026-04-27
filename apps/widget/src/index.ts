@@ -11,7 +11,6 @@ type ChatMsg =
   | { role: "pending"; text: string };
 
 interface State {
-  open: boolean;
   session: SessionState | null;
   authMode: "login" | "signup";
   authError: string;
@@ -26,7 +25,6 @@ const config = resolveConfig();
 const api = new SyntexApi(config);
 
 const state: State = {
-  open: false,
   session: null,
   authMode: "login",
   authError: "",
@@ -39,30 +37,22 @@ const state: State = {
 
 const host = document.createElement("div");
 host.setAttribute("data-syntex-widget", "");
+host.style.cssText = "display:flex;flex-direction:column;width:100%;height:100%;";
 const shadow = host.attachShadow({ mode: "open" });
 const style = document.createElement("style");
 style.textContent = CSS;
 shadow.appendChild(style);
 const root = document.createElement("div");
+root.style.cssText = "display:contents;";
 shadow.appendChild(root);
-document.body.appendChild(host);
+
+const mountTarget = config.mountEl ?? document.body;
+mountTarget.appendChild(host);
 
 function render(): void {
   root.replaceChildren();
 
-  const launcher = el("button", { class: "launcher", "aria-label": "Open chat" }, "💬");
-  launcher.addEventListener("click", () => {
-    state.open = !state.open;
-    if (state.open && !state.session) {
-      void refreshSession();
-    }
-    render();
-  });
-  root.appendChild(launcher);
-
-  if (!state.open) return;
-
-  const panel = el("div", { class: "panel", role: "dialog" });
+  const panel = el("div", { class: "panel", role: "main" });
 
   if (!state.session) {
     panel.appendChild(renderHeader("Loading…"));
@@ -79,6 +69,7 @@ function render(): void {
   }
 
   panel.appendChild(renderHeader("Syntex", true));
+
   if (!state.session.vps) {
     panel.appendChild(renderStatus("VPS not provisioned — contact support.", true));
   } else if (!state.session.vps.registered) {
@@ -111,12 +102,6 @@ function renderHeader(title: string, showModelPicker = false): HTMLElement {
   } else {
     header.appendChild(el("div", { style: "flex:1;font-weight:600;" }, title));
   }
-  const close = el("button", { class: "close", "aria-label": "Close" }, "×");
-  close.addEventListener("click", () => {
-    state.open = false;
-    render();
-  });
-  header.appendChild(close);
   return header;
 }
 
@@ -147,7 +132,7 @@ function renderComposer(): HTMLElement {
       form.requestSubmit();
     }
   });
-  const btn = el("button", { type: "submit" }, "Send") as HTMLButtonElement;
+  const btn = el("button", { type: "submit" }, "→") as HTMLButtonElement;
   if (state.busy) btn.disabled = true;
   form.appendChild(ta);
   form.appendChild(btn);
@@ -162,8 +147,9 @@ function renderComposer(): HTMLElement {
 }
 
 function renderAuth(): HTMLElement {
-  const wrap = el("form", { class: "auth" });
-  wrap.appendChild(
+  const wrap = el("form", { class: "auth" }) as HTMLFormElement;
+  const inner = el("div", { class: "auth-inner" });
+  inner.appendChild(
     el("h3", {}, state.authMode === "login" ? "Sign in" : "Create account"),
   );
   const email = el("input", {
@@ -196,11 +182,12 @@ function renderAuth(): HTMLElement {
     state.authError = "";
     render();
   });
-  wrap.appendChild(email);
-  wrap.appendChild(pwd);
-  wrap.appendChild(err);
-  wrap.appendChild(submit);
-  wrap.appendChild(toggle);
+  inner.appendChild(email);
+  inner.appendChild(pwd);
+  inner.appendChild(err);
+  inner.appendChild(submit);
+  inner.appendChild(toggle);
+  wrap.appendChild(inner);
   wrap.addEventListener("submit", async (e) => {
     e.preventDefault();
     state.authError = "";

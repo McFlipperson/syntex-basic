@@ -4,6 +4,10 @@ export const CSS = `
     all: initial;
     font-family: 'IBM Plex Mono', monospace;
     color: #fff;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
   }
   *, *::before, *::after {
     box-sizing: border-box;
@@ -23,87 +27,29 @@ export const CSS = `
   /* ── ANIMATIONS ──────────────────────────────────── */
   @keyframes pulse    { 0%,100%{opacity:1} 50%{opacity:0.3} }
   @keyframes fadeIn   { from{opacity:0} to{opacity:1} }
-  @keyframes slideUp  { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
 
-  /* ── LAUNCHER ────────────────────────────────────── */
-  .launcher {
-    position: fixed;
-    right: 20px;
-    bottom: 20px;
-    width: 52px;
-    height: 52px;
-    border-radius: 2px;
-    background: #000;
-    color: #B8FF00;
-    border: 1px solid #2a2a2a;
-    cursor: pointer;
-    font-size: 0;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.7);
-    z-index: 2147483647;
-    transition: border-color 0.15s, background 0.15s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .launcher::after {
-    content: 'SX';
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px;
-    color: #B8FF00;
-    letter-spacing: 2px;
-    line-height: 1;
-  }
-  .launcher:hover {
-    border-color: #B8FF00;
-    background: #080808;
-  }
-
-  /* ── PANEL ───────────────────────────────────────── */
+  /* ── PANEL (fills host) ──────────────────────────── */
   .panel {
-    position: fixed;
-    right: 20px;
-    bottom: 84px;
-    width: 400px;
-    height: min(620px, calc(100vh - 112px));
-    background: #000;
-    border: 1px solid #2a2a2a;
-    border-radius: 2px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+    flex: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    z-index: 2147483647;
-    animation: slideUp 0.22s ease;
+    background: #000;
     font-family: 'IBM Plex Mono', monospace;
-  }
-  @media (max-width: 480px) {
-    .panel {
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-      border-radius: 0;
-      bottom: 0;
-      right: 0;
-    }
-    .launcher {
-      right: 16px;
-      bottom: 16px;
-    }
+    animation: fadeIn 0.18s ease;
   }
 
   /* ── HEADER ──────────────────────────────────────── */
   .header {
     display: flex;
     align-items: center;
-    padding: 12px 14px;
+    padding: 12px 16px;
     border-bottom: 1px solid #2a2a2a;
     flex-shrink: 0;
     gap: 10px;
     background: #000;
     min-height: 48px;
   }
-  /* Loading title */
   .header > div {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 22px;
@@ -113,9 +59,9 @@ export const CSS = `
     line-height: 1;
     font-weight: normal;
   }
-  /* Model selector */
   .header select {
     flex: 1;
+    max-width: 320px;
     font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     letter-spacing: 0.1em;
@@ -136,25 +82,10 @@ export const CSS = `
   }
   .header select:focus { border-color: #444; color: #fff; }
   .header select option { background: #1a1a1a; color: #fff; }
-  /* Close button */
-  .close {
-    background: none;
-    border: none;
-    font-size: 18px;
-    cursor: pointer;
-    color: #444;
-    padding: 4px 7px;
-    line-height: 1;
-    transition: color 0.15s;
-    flex-shrink: 0;
-    font-family: 'IBM Plex Mono', monospace;
-    border-radius: 2px;
-  }
-  .close:hover { color: #fff; }
 
   /* ── STATUS LINE ─────────────────────────────────── */
   .status-line {
-    padding: 9px 14px;
+    padding: 9px 16px;
     font-size: 10px;
     letter-spacing: 0.06em;
     color: #888;
@@ -175,10 +106,15 @@ export const CSS = `
   .messages {
     flex: 1;
     overflow-y: auto;
-    padding: 16px;
+    padding: 20px 16px;
     display: flex;
     flex-direction: column;
     gap: 14px;
+  }
+  /* Center content on wide screens */
+  @media (min-width: 700px) {
+    .messages { padding: 24px max(16px, calc(50% - 360px)); }
+    .composer  { padding: 10px max(16px, calc(50% - 360px)) 16px; }
   }
   .msg {
     max-width: 82%;
@@ -189,6 +125,9 @@ export const CSS = `
     white-space: pre-wrap;
     word-wrap: break-word;
     font-family: 'IBM Plex Mono', monospace;
+  }
+  @media (min-width: 700px) {
+    .msg { font-size: 13px; max-width: 72%; }
   }
   .msg.agent {
     align-self: flex-start;
@@ -223,7 +162,7 @@ export const CSS = `
 
   /* ── COMPOSER ────────────────────────────────────── */
   .composer {
-    padding: 10px 12px 14px;
+    padding: 10px 16px 16px;
     border-top: 1px solid #2a2a2a;
     flex-shrink: 0;
     display: flex;
@@ -231,18 +170,22 @@ export const CSS = `
     gap: 8px;
     background: #000;
   }
+  /* safe-area padding for iOS home indicator */
+  @supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .composer { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+  }
   .composer textarea {
     flex: 1;
     resize: none;
     background: #1a1a1a;
     border: 1px solid #2a2a2a;
     border-radius: 2px;
-    padding: 8px 10px;
+    padding: 10px 12px;
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
+    font-size: 13px;
     color: #fff;
-    min-height: 36px;
-    max-height: 120px;
+    min-height: 40px;
+    max-height: 140px;
     line-height: 1.6;
     outline: none;
     transition: border-color 0.15s;
@@ -250,8 +193,8 @@ export const CSS = `
   .composer textarea:focus { border-color: #444; }
   .composer textarea::placeholder { color: #444; }
   .composer button {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     flex-shrink: 0;
     background: #B8FF00;
     color: #000;
@@ -277,30 +220,38 @@ export const CSS = `
 
   /* ── AUTH ────────────────────────────────────────── */
   .auth {
-    padding: 24px 20px;
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    flex: 1;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
     background: #000;
     overflow-y: auto;
   }
+  .auth-inner {
+    width: 100%;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
   .auth h3 {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 32px;
+    font-size: 36px;
     letter-spacing: 2px;
     color: #fff;
     line-height: 1;
     font-weight: normal;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
   }
   .auth input {
-    padding: 10px 12px;
+    padding: 12px 14px;
     background: #1a1a1a;
     border: 1px solid #2a2a2a;
     border-radius: 2px;
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
+    font-size: 13px;
     color: #fff;
     outline: none;
     transition: border-color 0.15s;
@@ -313,7 +264,7 @@ export const CSS = `
     color: #000;
     border: none;
     border-radius: 2px;
-    padding: 12px;
+    padding: 13px;
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     font-weight: 700;
@@ -322,7 +273,7 @@ export const CSS = `
     cursor: pointer;
     transition: background 0.15s;
     width: 100%;
-    margin-top: 2px;
+    margin-top: 4px;
   }
   .auth button[type="submit"]:hover { background: #a0e600; }
   .auth .toggle {
